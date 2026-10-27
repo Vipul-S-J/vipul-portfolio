@@ -334,6 +334,8 @@ main, .nav, .footer { position: relative; z-index: 1; }
   transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
 }
 .proj-card:hover { transform: translateY(-8px); box-shadow: 0 18px 30px -16px rgba(2, 12, 27, 0.8); }
+.proj-card--feature { border-color: var(--accent); background: linear-gradient(180deg, var(--accent-tint), var(--bg-light) 60%); }
+.proj-links a { font-family: var(--font-mono); font-size: 0.85rem; }
 .proj-card__top {
   display: flex;
   justify-content: space-between;

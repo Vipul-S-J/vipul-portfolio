@@ -22,8 +22,28 @@
     toggle.setAttribute('aria-expanded', String(isOpen));
   });
 
-  links.querySelectorAll('a').forEach(function (a) {
-    a.addEventListener('click', closeMenu);
+  // --- Smooth scroll for all in-page anchor links (robust, nav-offset aware) ---
+  function scrollToId(id) {
+    const target = document.getElementById(id);
+    if (!target) return;
+    const navH = nav.offsetHeight || 72;
+    const top = target.getBoundingClientRect().top + window.scrollY - navH + 1;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      const href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      const id = href.slice(1);
+      const target = document.getElementById(id);
+      if (!target) return;
+      e.preventDefault();
+      closeMenu();
+      scrollToId(id);
+      history.replaceState(null, '', href);
+    });
   });
 
   // --- Nav styling + hide on scroll down, show on scroll up ---
