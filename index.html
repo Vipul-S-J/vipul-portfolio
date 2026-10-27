@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Vipul S Jain — Cloud Engineer specializing in AWS architecture, security, and automation." />
+  <title>Vipul S Jain — Cloud Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Background accents -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <header class="nav" id="nav">
+    <a href="#home" class="nav__logo">VSJ<span>.</span></a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="nav__toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero" id="home">
+      <div class="hero__inner reveal">
+        <p class="hero__eyebrow">Hi, my name is</p>
+        <h1 class="hero__title">Vipul S Jain.</h1>
+        <h2 class="hero__subtitle">I build and secure the cloud.</h2>
+        <p class="hero__lead">
+          I'm a <strong>Cloud Engineer</strong> with 3+ years of hands-on experience designing,
+          securing, and automating AWS environments — from VPC networking and IAM to
+          database migration and CI/CD.
+        </p>
+        <div class="hero__actions">
+          <a href="#projects" class="btn btn--primary">View my work</a>
+          <a href="#contact" class="btn btn--ghost">Get in touch</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section class="section" id="about">
+      <div class="section__head reveal">
+        <span class="section__num">01.</span>
+        <h2 class="section__title">About me</h2>
+      </div>
+      <div class="about reveal">
+        <div class="about__text">
+          <p>
+            I'm a Cloud Engineer focused on building reliable, secure, and automated
+            infrastructure on <strong>Amazon Web Services</strong>. My day-to-day spans
+            VPC architecture, IAM least-privilege security, database migration with AWS DMS,
+            and CI/CD automation.
+          </p>
+          <p>
+            I currently work at <strong>KaHa Technologies</strong>, where I architect secure
+            cloud environments, cut incident response time with proactive monitoring, and
+            keep deployments consistent and low-downtime. I care about reliability,
+            automation, and doing the security work right the first time.
+          </p>
+          <p>Technologies I work with regularly:</p>
+          <ul class="about__tech">
+            <li>AWS (EC2, S3, VPC)</li>
+            <li>Lambda &amp; CloudFront</li>
+            <li>RDS &amp; DocumentDB</li>
+            <li>IAM &amp; WAF</li>
+            <li>GitLab CI/CD</li>
+            <li>Linux &amp; Bash</li>
+          </ul>
+        </div>
+        <div class="about__card">
+          <div class="about__avatar" aria-hidden="true">VSJ</div>
+          <ul class="about__facts">
+            <li><span>Role</span>Cloud Engineer</li>
+            <li><span>Experience</span>3+ years</li>
+            <li><span>Focus</span>AWS Architecture &amp; Security</li>
+            <li><span>Location</span>Bengaluru, India</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills -->
+    <section class="section" id="skills">
+      <div class="section__head reveal">
+        <span class="section__num">02.</span>
+        <h2 class="section__title">Skills &amp; tech</h2>
+      </div>
+      <div class="skills reveal">
+        <article class="skill-card">
+          <h3>Cloud &amp; Compute</h3>
+          <ul>
+            <li>EC2</li><li>Lambda</li><li>S3</li><li>CloudFront</li><li>ALB</li><li>EFS</li>
+          </ul>
+        </article>
+        <article class="skill-card">
+          <h3>Networking &amp; Security</h3>
+          <ul>
+            <li>VPC</li><li>VPC Peering</li><li>Route 53</li><li>IAM</li><li>WAF</li><li>ACM / SSL</li><li>VPN &amp; MFA</li>
+          </ul>
+        </article>
+        <article class="skill-card">
+          <h3>Data &amp; Migration</h3>
+          <ul>
+            <li>RDS</li><li>DocumentDB</li><li>AWS DMS</li><li>Backups &amp; Snapshots</li>
+          </ul>
+        </article>
+        <article class="skill-card">
+          <h3>Automation &amp; Ops</h3>
+          <ul>
+            <li>GitLab CI/CD</li><li>CodeDeploy</li><li>CloudWatch</li><li>SSM</li><li>Bash / Python</li><li>Linux</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- Experience -->
+    <section class="section" id="experience">
+      <div class="section__head reveal">
+        <span class="section__num">03.</span>
+        <h2 class="section__title">Where I've worked</h2>
+      </div>
+      <div class="timeline">
+        <article class="tl-item reveal">
+          <div class="tl-dot" aria-hidden="true"></div>
+          <div class="tl-body">
+            <h3 class="tl-role">Software / Server Engineer <span>@ KaHa Technologies</span></h3>
+            <p class="tl-date">April 2023 — Present</p>
+            <ul class="tl-points">
+              <li>Architected secure, scalable AWS environments using EC2, S3, RDS, and Lambda.</li>
+              <li>Designed VPC architectures with public/private subnets, NAT gateways, and VPN connections.</li>
+              <li>Enforced security with IAM least-privilege roles, MFA, and WAF rules.</li>
+              <li>Reduced incident response time ~40% with CloudWatch dashboards and proactive alerting across 20+ resources.</li>
+              <li>Managed RDS and DocumentDB with automated backups and point-in-time recovery.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="tl-item reveal">
+          <div class="tl-dot" aria-hidden="true"></div>
+          <div class="tl-body">
+            <h3 class="tl-role">AWS DevOps Intern <span>@ KredX</span></h3>
+            <p class="tl-date">Internship — Bengaluru</p>
+            <ul class="tl-points">
+              <li>Migrated MongoDB to Amazon DocumentDB using AWS DMS with minimal-downtime replication and full data validation.</li>
+              <li>Built CI/CD pipelines with GitLab CI/CD and AWS CodeDeploy for consistent, version-controlled releases on EC2.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Projects -->
+    <section class="section" id="projects">
+      <div class="section__head reveal">
+        <span class="section__num">04.</span>
+        <h2 class="section__title">Things I've built</h2>
+      </div>
+      <div class="projects reveal">
+        <article class="proj-card">
+          <div class="proj-card__top">
+            <span class="proj-icon" aria-hidden="true">☁️</span>
+            <div class="proj-links">
+              <a href="#" aria-label="View project">↗</a>
+            </div>
+          </div>
+          <h3>Zero-Downtime DB Migration</h3>
+          <p>Migrated a production MongoDB workload to Amazon DocumentDB using AWS DMS with full data validation and minimal downtime.</p>
+          <ul class="proj-tags">
+            <li>AWS DMS</li><li>DocumentDB</li><li>MongoDB</li>
+          </ul>
+        </article>
+        <article class="proj-card">
+          <div class="proj-card__top">
+            <span class="proj-icon" aria-hidden="true">🔁</span>
+            <div class="proj-links">
+              <a href="#" aria-label="View project">↗</a>
+            </div>
+          </div>
+          <h3>CI/CD Automation Pipeline</h3>
+          <p>Designed GitLab CI/CD pipelines integrated with AWS CodeDeploy for consistent, version-controlled, low-downtime deployments to EC2.</p>
+          <ul class="proj-tags">
+            <li>GitLab CI/CD</li><li>CodeDeploy</li><li>EC2</li>
+          </ul>
+        </article>
+        <article class="proj-card">
+          <div class="proj-card__top">
+            <span class="proj-icon" aria-hidden="true">🛡️</span>
+            <div class="proj-links">
+              <a href="#" aria-label="View project">↗</a>
+            </div>
+          </div>
+          <h3>Secure VPC Architecture</h3>
+          <p>Built multi-subnet VPCs with NAT gateways, VPN, IAM least-privilege, and WAF rules to protect production web applications.</p>
+          <ul class="proj-tags">
+            <li>VPC</li><li>IAM</li><li>WAF</li><li>Route 53</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="section section--contact" id="contact">
+      <div class="contact reveal">
+        <span class="section__num">05.</span>
+        <h2 class="contact__title">Get in touch</h2>
+        <p class="contact__text">
+          I'm always open to talking about cloud infrastructure, automation, or a new
+          opportunity. Drop me a line and I'll get back to you.
+        </p>
+        <a class="btn btn--primary" href="mailto:vipulsjain05@gmail.com">Say hello</a>
+        <div class="contact__socials">
+          <a href="mailto:vipulsjain05@gmail.com">Email</a>
+          <a href="tel:+919148858402">+91 91488 58402</a>
+          <!-- TODO: replace with your real handles -->
+          <a href="https://linkedin.com/in/your-handle" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://github.com/your-handle" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Designed &amp; built by Vipul S Jain</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
