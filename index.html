@@ -8,12 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0506'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' dominant-baseline='middle' font-family='monospace' font-weight='700' font-size='30' fill='%23ff3b4e'%3EVJ%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Scroll progress -->
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
   <!-- Background accents -->
   <div class="bg-grid" aria-hidden="true"></div>
-  <div class="bg-glow" aria-hidden="true"></div>
+  <div class="bg-glow" id="bgGlow" aria-hidden="true"></div>
 
   <!-- Navigation -->
   <header class="nav" id="nav">
@@ -33,16 +37,19 @@
   <main>
     <!-- Hero -->
     <section class="hero" id="home">
-      <div class="hero__inner reveal">
-        <p class="hero__eyebrow">Hi, my name is</p>
-        <h1 class="hero__title">Vipul S Jain.</h1>
-        <h2 class="hero__subtitle">I build and secure the cloud.</h2>
-        <p class="hero__lead">
+      <canvas class="hero__canvas" id="heroCanvas" aria-hidden="true"></canvas>
+      <div class="hero__inner">
+        <p class="hero__eyebrow hero-anim" style="--d: 0.1s">Hi, my name is</p>
+        <h1 class="hero__title hero-anim" style="--d: 0.25s"><span class="grad">Vipul S Jain</span>.</h1>
+        <h2 class="hero__subtitle hero-anim" style="--d: 0.4s" aria-label="I build and secure the cloud.">
+          <span aria-hidden="true">I <span class="typed" id="typed">build and secure the cloud.</span><span class="caret"></span></span>
+        </h2>
+        <p class="hero__lead hero-anim" style="--d: 0.55s">
           I'm a <strong>Cloud Engineer</strong> with 3+ years of hands-on experience designing,
           securing, and automating AWS environments — from VPC networking and IAM to
           database migration and CI/CD.
         </p>
-        <div class="hero__actions">
+        <div class="hero__actions hero-anim" style="--d: 0.7s">
           <a href="#projects" class="btn btn--primary">View my work</a>
           <a href="#contact" class="btn btn--ghost">Get in touch</a>
         </div>
@@ -70,7 +77,7 @@
             automation, and doing the security work right the first time.
           </p>
           <p>Technologies I work with regularly:</p>
-          <ul class="about__tech">
+          <ul class="about__tech stagger">
             <li>AWS (EC2, S3, VPC)</li>
             <li>Lambda &amp; CloudFront</li>
             <li>RDS &amp; DocumentDB</li>
@@ -79,7 +86,7 @@
             <li>Linux &amp; Bash</li>
           </ul>
         </div>
-        <div class="about__card">
+        <div class="about__card tilt">
           <div class="about__avatar" aria-hidden="true">VSJ</div>
           <ul class="about__facts">
             <li><span>Role</span>Cloud Engineer</li>
@@ -97,26 +104,26 @@
         <span class="section__num">02.</span>
         <h2 class="section__title">Skills &amp; tech</h2>
       </div>
-      <div class="skills reveal">
-        <article class="skill-card">
+      <div class="skills reveal stagger">
+        <article class="skill-card tilt">
           <h3>Cloud &amp; Compute</h3>
           <ul>
             <li>EC2</li><li>Lambda</li><li>S3</li><li>CloudFront</li><li>ALB</li><li>EFS</li>
           </ul>
         </article>
-        <article class="skill-card">
+        <article class="skill-card tilt">
           <h3>Networking &amp; Security</h3>
           <ul>
             <li>VPC</li><li>VPC Peering</li><li>Route 53</li><li>IAM</li><li>WAF</li><li>ACM / SSL</li><li>VPN &amp; MFA</li>
           </ul>
         </article>
-        <article class="skill-card">
+        <article class="skill-card tilt">
           <h3>Data &amp; Migration</h3>
           <ul>
             <li>RDS</li><li>DocumentDB</li><li>AWS DMS</li><li>Backups &amp; Snapshots</li>
           </ul>
         </article>
-        <article class="skill-card">
+        <article class="skill-card tilt">
           <h3>Automation &amp; Ops</h3>
           <ul>
             <li>GitLab CI/CD</li><li>CodeDeploy</li><li>CloudWatch</li><li>SSM</li><li>Bash / Python</li><li>Linux</li>
@@ -131,7 +138,7 @@
         <span class="section__num">03.</span>
         <h2 class="section__title">Where I've worked</h2>
       </div>
-      <div class="timeline">
+      <div class="timeline line-draw">
         <article class="tl-item reveal">
           <div class="tl-dot" aria-hidden="true"></div>
           <div class="tl-body">
@@ -166,8 +173,8 @@
         <span class="section__num">04.</span>
         <h2 class="section__title">Things I've built</h2>
       </div>
-      <div class="projects reveal">
-        <article class="proj-card proj-card--feature">
+      <div class="projects reveal stagger">
+        <article class="proj-card proj-card--feature tilt">
           <div class="proj-card__top">
             <img class="proj-icon" src="assets/icons/aws-cloud.svg" alt="AWS Cloud" width="48" height="48" loading="lazy" />
             <div class="proj-links">
@@ -183,7 +190,7 @@
             <li>AWS</li><li>IaC</li><li>Automation</li><li>Security</li>
           </ul>
         </article>
-        <article class="proj-card">
+        <article class="proj-card tilt">
           <div class="proj-card__top">
             <img class="proj-icon" src="assets/icons/ses.svg" alt="Amazon Simple Email Service" width="48" height="48" loading="lazy" />
             <div class="proj-links">
@@ -199,7 +206,7 @@
             <li>SES</li><li>Kinesis Firehose</li><li>S3</li><li>Athena</li><li>Terraform</li>
           </ul>
         </article>
-        <article class="proj-card">
+        <article class="proj-card tilt">
           <div class="proj-card__top">
             <img class="proj-icon" src="assets/icons/codedeploy.svg" alt="AWS CodeDeploy" width="48" height="48" loading="lazy" />
             <div class="proj-links">
@@ -215,7 +222,7 @@
             <li>CodeDeploy</li><li>GitLab CI/CD</li><li>Auto Scaling</li><li>Spot</li><li>ALB</li>
           </ul>
         </article>
-        <article class="proj-card">
+        <article class="proj-card tilt">
           <div class="proj-card__top">
             <img class="proj-icon" src="assets/icons/dms.svg" alt="AWS Database Migration Service" width="48" height="48" loading="lazy" />
             <div class="proj-links">
@@ -231,7 +238,7 @@
             <li>AWS DMS</li><li>DocumentDB</li><li>MongoDB</li>
           </ul>
         </article>
-        <article class="proj-card">
+        <article class="proj-card tilt">
           <div class="proj-card__top">
             <img class="proj-icon" src="assets/icons/vpc.svg" alt="Amazon VPC" width="48" height="48" loading="lazy" />
             <div class="proj-links">

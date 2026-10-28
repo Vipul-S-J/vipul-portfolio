@@ -70,7 +70,7 @@ main, .footer { position: relative; z-index: 1; }
   align-items: center;
   justify-content: space-between;
   padding: 0 clamp(1.5rem, 5vw, 3rem);
-  background: rgba(10, 25, 47, 0.7);
+  background: rgba(13, 5, 6, 0.75);
   backdrop-filter: blur(10px);
   transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
 }
@@ -141,7 +141,9 @@ main, .footer { position: relative; z-index: 1; }
   padding: var(--nav-h) clamp(1.5rem, 8vw, 10rem) 0;
   max-width: var(--max);
   margin: 0 auto;
+  position: relative;
 }
+.hero__inner { position: relative; z-index: 1; }
 .hero__eyebrow {
   font-family: var(--font-mono);
   color: var(--accent);
@@ -265,7 +267,7 @@ main, .footer { position: relative; z-index: 1; }
 /* ---------- Skills ---------- */
 .skills {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 }
 .skill-card {
@@ -358,7 +360,7 @@ main, .footer { position: relative; z-index: 1; }
   height: 48px;
   border-radius: 8px;
 }
-.proj-links a { color: var(--slate-light); font-size: 1.3rem; transition: color 0.25s var(--ease); }
+.proj-links a { color: var(--slate-light); transition: color 0.25s var(--ease); }
 .proj-links a:hover { color: var(--accent); }
 .proj-card h3 { color: var(--slate-lightest); font-size: 1.2rem; margin-bottom: 0.7rem; }
 .proj-card p { font-size: 0.95rem; flex: 1; }
@@ -423,10 +425,199 @@ main, .footer { position: relative; z-index: 1; }
   .nav__links.open { transform: translateY(0); }
   .nav__toggle { display: flex; }
   .about { grid-template-columns: 1fr; }
+  .skills { grid-template-columns: 1fr; }
   .section__head::after { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ============================================================
+   Animations & effects
+   ============================================================ */
+
+@keyframes rise {
+  from { opacity: 0; translate: 0 26px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+@keyframes shimmer {
+  to { background-position: -300% 0; }
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+@keyframes spin {
+  to { rotate: 360deg; }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* ---------- Scroll progress bar ---------- */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #ff8a5c);
+  transform: scaleX(0);
+  transform-origin: left;
+  z-index: 20;
+  box-shadow: 0 0 10px rgba(255, 59, 78, 0.7);
+}
+
+/* ---------- Cursor-following glow ---------- */
+.bg-glow { transition: translate 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* ---------- Hero ---------- */
+.hero__canvas {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 100vw;
+  translate: -50% 0;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent);
+          mask-image: linear-gradient(to bottom, #000 70%, transparent);
+}
+.hero-anim {
+  opacity: 0;
+  animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) both;
+}
+.grad {
+  background: linear-gradient(90deg, var(--slate-lightest) 0%, var(--accent) 25%, #ff8a5c 50%, var(--accent) 75%, var(--slate-lightest) 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  animation: shimmer 10s linear infinite;
+}
+.hero__subtitle { min-height: 2.1em; }
+.typed { color: var(--slate-lightest); }
+.caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 0.85em;
+  margin-left: 0.08em;
+  vertical-align: -0.05em;
+  background: var(--accent);
+  animation: blink 1s steps(1) infinite;
+}
+
+/* ---------- Buttons: shine sweep ---------- */
+.btn { position: relative; overflow: hidden; }
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%;
+  width: 60%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.7s ease;
+  pointer-events: none;
+}
+.btn:hover::after { left: 140%; }
+
+/* ---------- Nav: animated underline + active section ---------- */
+.nav__links a { position: relative; }
+.nav__links a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -6px;
+  width: 100%; height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease);
+}
+.nav__links a:hover::after,
+.nav__links a.active::after { transform: scaleX(1); }
+.nav__links a.active { color: var(--accent); }
+.nav__logo { transition: text-shadow 0.3s ease; }
+.nav__logo:hover { text-shadow: 0 0 14px rgba(255, 59, 78, 0.8); }
+
+/* ---------- Staggered reveal for grids/lists ---------- */
+.reveal.stagger { opacity: 1; transform: none; }
+.stagger > * { opacity: 0; }
+.visible.stagger > *,
+.visible .stagger > * {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+/* ---------- Cards: 3D tilt + cursor spotlight ---------- */
+.tilt {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tilt > * { position: relative; }
+.tilt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 59, 78, 0.16), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.tilt:hover::before { opacity: 1; }
+.tilt.is-tilting { transition: transform 0.12s linear, border-color 0.3s ease, box-shadow 0.3s ease; }
+.tilt:hover { border-color: rgba(255, 59, 78, 0.6); box-shadow: 0 20px 40px -18px rgba(255, 59, 78, 0.35); }
+
+/* Icon lifts slightly on hover */
+.proj-icon { transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+.proj-card:hover .proj-icon { transform: translateY(-3px) scale(1.08); }
+
+/* Skill chips */
+.skill-card li { transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease; }
+.skill-card li:hover { background: var(--accent); color: var(--bg); transform: translateY(-2px); }
+
+/* ---------- About avatar: rotating ring ---------- */
+.about__avatar { position: relative; }
+.about__avatar::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 59, 78, 0.6);
+  animation: spin 14s linear infinite;
+}
+
+/* ---------- Timeline: line draws in, dots pulse ---------- */
+.line-draw::before {
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.line-draw.visible::before { transform: scaleY(1); }
+.tl-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-ring 2.2s ease-out infinite;
+}
+
+/* ---------- Section heading underline grows in ---------- */
+.section__head::after {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+.section__head.visible::after { transform: scaleX(1); }
+
+/* ---------- Reduced motion: turn effects off ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .hero-anim, .stagger > * { opacity: 1; animation: none !important; }
+  .grad, .caret, .about__avatar::before, .tl-dot::after { animation: none; }
+  .line-draw::before, .section__head::after { transform: none; transition: none; }
+  .hero__canvas { display: none; }
+  .btn::after { display: none; }
 }
