@@ -352,7 +352,12 @@ main, .footer { position: relative; z-index: 1; }
   align-items: center;
   margin-bottom: 1.2rem;
 }
-.proj-icon { font-size: 2rem; }
+.proj-icon {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
 .proj-links a { color: var(--slate-light); font-size: 1.3rem; transition: color 0.25s var(--ease); }
 .proj-links a:hover { color: var(--accent); }
 .proj-card h3 { color: var(--slate-lightest); font-size: 1.2rem; margin-bottom: 0.7rem; }
