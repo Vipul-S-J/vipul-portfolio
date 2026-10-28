@@ -42,7 +42,7 @@ a { color: inherit; text-decoration: none; }
     linear-gradient(rgba(255, 59, 78, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 59, 78, 0.03) 1px, transparent 1px);
   background-size: 40px 40px;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
 }
 .bg-glow {
@@ -54,11 +54,12 @@ a { color: inherit; text-decoration: none; }
   max-width: 800px;
   max-height: 800px;
   background: radial-gradient(circle, rgba(255, 59, 78, 0.12), transparent 60%);
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
 }
 
-main, .nav, .footer { position: relative; z-index: 1; }
+main, .footer { position: relative; z-index: 1; }
+.nav { position: fixed; z-index: 10; }
 
 /* ---------- Navigation ---------- */
 .nav {
@@ -336,6 +337,15 @@ main, .nav, .footer { position: relative; z-index: 1; }
 .proj-card:hover { transform: translateY(-8px); box-shadow: 0 18px 30px -16px rgba(0, 0, 0, 0.9); }
 .proj-card--feature { border-color: var(--accent); background: linear-gradient(180deg, var(--accent-tint), var(--bg-light) 60%); }
 .proj-links a { font-family: var(--font-mono); font-size: 0.85rem; }
+.gh-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--slate-light);
+  transition: color 0.25s var(--ease);
+}
+.gh-link svg { display: block; }
+.gh-link:hover { color: var(--accent); }
 .proj-card__top {
   display: flex;
   justify-content: space-between;
