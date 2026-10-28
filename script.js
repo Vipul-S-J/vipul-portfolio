@@ -2,7 +2,7 @@
 //  Portfolio interactions
 // ============================================================
 
-(function () {
+function initPortfolio() {
   'use strict';
 
   const nav = document.getElementById('nav');
@@ -11,22 +11,25 @@
 
   // --- Mobile menu toggle ---
   function closeMenu() {
+    if (!links || !toggle) return;
     links.classList.remove('open');
     toggle.classList.remove('open');
     toggle.setAttribute('aria-expanded', 'false');
   }
 
-  toggle.addEventListener('click', function () {
-    const isOpen = links.classList.toggle('open');
-    toggle.classList.toggle('open', isOpen);
-    toggle.setAttribute('aria-expanded', String(isOpen));
-  });
+  if (toggle && links) {
+    toggle.addEventListener('click', function () {
+      const isOpen = links.classList.toggle('open');
+      toggle.classList.toggle('open', isOpen);
+      toggle.setAttribute('aria-expanded', String(isOpen));
+    });
+  }
 
   // --- Smooth scroll for all in-page anchor links (robust, nav-offset aware) ---
   function scrollToId(id) {
     const target = document.getElementById(id);
     if (!target) return;
-    const navH = nav.offsetHeight || 72;
+    const navH = (nav && nav.offsetHeight) || 72;
     const top = target.getBoundingClientRect().top + window.scrollY - navH + 1;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
@@ -38,7 +41,7 @@
       if (!href || href === '#') return;
       const id = href.slice(1);
       const target = document.getElementById(id);
-      if (!target) return;
+      if (!target) return; // let the browser handle unknown anchors natively
       e.preventDefault();
       closeMenu();
       scrollToId(id);
@@ -50,12 +53,15 @@
   let lastY = window.scrollY;
   window.addEventListener('scroll', function () {
     const y = window.scrollY;
-    nav.classList.toggle('nav--scrolled', y > 20);
 
-    if (y > lastY && y > 200 && !links.classList.contains('open')) {
-      nav.classList.add('nav--hidden');
-    } else {
-      nav.classList.remove('nav--hidden');
+    if (nav) {
+      nav.classList.toggle('nav--scrolled', y > 20);
+      const menuOpen = links && links.classList.contains('open');
+      if (y > lastY && y > 200 && !menuOpen) {
+        nav.classList.add('nav--hidden');
+      } else {
+        nav.classList.remove('nav--hidden');
+      }
     }
     lastY = y;
   }, { passive: true });
@@ -78,4 +84,11 @@
     // Fallback: just show everything
     reveals.forEach(function (el) { el.classList.add('visible'); });
   }
-})();
+}
+
+// Run after the DOM is ready, regardless of where this script is loaded.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPortfolio);
+} else {
+  initPortfolio();
+}
