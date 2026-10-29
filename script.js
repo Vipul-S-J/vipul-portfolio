@@ -661,16 +661,16 @@
         var alpha;
         if (p.kind === 0) {
           // Inner orb: dark face, light concentrated on the rim
-          alpha = 0.03 + depth * 0.12 + rim * 1.0;
-          alpha *= 1 - lowerRight * 0.8 * (1 - rim * 0.55);
+          alpha = 0.07 + depth * 0.22 + rim * 1.25;
+          alpha *= 1 - lowerRight * 0.65 * (1 - rim * 0.55);
         } else if (p.kind === 1) {
-          alpha = 0.55 + depth * 0.45;
+          alpha = 0.75 + depth * 0.45;
         } else if (p.kind === 3) {
           // Outer shell: faint, with a thin brighter outline
-          alpha = (0.16 + depth * 0.1 + rim * 0.55) * (0.6 + p.s * 0.4);
-          alpha *= 1 - lowerRight * 0.55;
+          alpha = (0.24 + depth * 0.14 + rim * 0.7) * (0.6 + p.s * 0.4);
+          alpha *= 1 - lowerRight * 0.45;
         } else {
-          alpha = 0.06 + p.s * 0.2;
+          alpha = 0.1 + p.s * 0.28;
         }
         if (p.kind === 0 && rim > 0.45 && x3 < 0) ci = Math.max(0, ci - 1); // only the lit (left) rim goes paler
         if (p.kind === 1) ci = Math.max(2, Math.min(6, Math.round(2 + (x3 + 0.8) * 2.6)));
