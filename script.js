@@ -16,8 +16,6 @@
   function showEverything() {
     clearTimeout(window.__revealFallback);
     root.classList.add('reveal-all');
-    var pct = $('#trafficPct');
-    if (pct) pct.textContent = '100%';
     $$('[data-count]').forEach(function (el) {
       el.textContent = (el.dataset.prefix || '') + el.dataset.count + (el.dataset.suffix || '');
     });
@@ -242,6 +240,8 @@
   // ----------------------------------------------------------
   if (!M) {
     showEverything();
+    initProjectGallery();
+    startOrbIfPresent();
     initMotionToggle();
     startTyping();
     initCopy();
@@ -268,36 +268,19 @@
   }
 
   // ----------------------------------------------------------
-  // Hero entrance + deploy terminal sequence
+  // Hero entrance + orb
   // ----------------------------------------------------------
   enter($$('[data-hero]'), 28, stagger(0.09, { startDelay: 0.1 }));
 
-  var terminal = $('#terminal');
-  if (terminal) {
-    var lines = $$('.terminal__body li', terminal);
-    var bar = $('#trafficBar');
-    var pctEl = $('#trafficPct');
-
+  var orbEl = $('#orb');
+  if (orbEl) {
     if (reduceMotion) {
-      animate([terminal].concat(lines), { opacity: [0, 1] }, { duration: 0.25 });
-      bar.style.transform = 'none';
-      pctEl.textContent = '100%';
+      animate(orbEl, { opacity: [0, 1] }, { duration: 0.3 });
     } else {
-      var pct = M.motionValue(0);
-      pct.on('change', function (v) { pctEl.textContent = Math.round(v) + '%'; });
-
-      var seq = [
-        [terminal, { opacity: [0, 1], y: [30, 0], scale: [0.97, 1] }, { type: 'spring', visualDuration: 0.8, bounce: 0, at: 0.35 }]
-      ];
-      lines.forEach(function (li, i) {
-        seq.push([li, { opacity: [0, 1], x: [-10, 0] }, { duration: 0.3, ease: 'easeOut', at: i === 0 ? 0.95 : '+0.12' }]);
-        if (li.classList.contains('t-progress')) {
-          seq.push([bar, { scaleX: [0, 1] }, { duration: 0.9, ease: 'easeInOut', at: '+0.05' }]);
-          seq.push([pct, 100, { duration: 0.9, ease: 'easeInOut', at: '<' }]);
-        }
+      animate(orbEl, { opacity: [0, 1], scale: [0.85, 1] }, {
+        scale: { type: 'spring', visualDuration: 1.2, bounce: 0, delay: 0.2 },
+        opacity: { duration: 1, ease: 'easeOut', delay: 0.2 }
       });
-      // Play when the terminal is on screen (below the fold on phones)
-      inView(terminal, function () { animate(seq); }, { amount: 0.4 });
     }
   }
 
@@ -340,7 +323,15 @@
       target: hero,
       offset: ['start start', 'end start']
     });
+    if (orbEl) {
+      scroll(animate(orbEl, { y: [0, 120], scale: [1, 0.9] }, { ease: 'linear' }), {
+        target: hero,
+        offset: ['start start', 'end start']
+      });
+    }
   }
+
+  initProjectGallery();
 
   // ----------------------------------------------------------
   // Reveal on scroll
@@ -425,98 +416,221 @@
   initCopy();
 
   // ----------------------------------------------------------
-  // Hero particle network (paused when off-screen / tab hidden)
+  // Hero orb: a rotating particle sphere (paused off-screen,
+  // when the tab is hidden, or when animations are paused)
   // ----------------------------------------------------------
-  var canvas = $('#heroCanvas');
-  if (canvas && canvas.getContext && !reduceMotion) startParticles(canvas, finePointer);
+  startOrbIfPresent();
 
-  function startParticles(canvas, trackMouse) {
-    var ctx = canvas.getContext('2d');
-    var LINK = 125, LINK_MOUSE = 170;
-    var mouse = { x: -9999, y: -9999 };
-    var w = 0, h = 0, particles = [];
-    var running = false, rafId = 0;
+  function startOrbIfPresent() {
+    var orbCanvas = $('#orbCanvas');
+    if (orbCanvas && orbCanvas.getContext) startOrb(orbCanvas, { animate: !reduceMotion, trackMouse: finePointer && !reduceMotion });
+  }
 
-    function resize() {
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = canvas.clientWidth; h = canvas.clientHeight;
-      canvas.width = w * dpr; canvas.height = h * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      var count = Math.round(Math.min(70, Math.max(24, (w * h) / 20000)));
-      particles = [];
-      for (var i = 0; i < count; i++) {
-        particles.push({
-          x: Math.random() * w, y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
-          r: Math.random() * 1.5 + 0.6
+
+  // ============================================================
+  // Projects gallery: vertical scroll moves the cards sideways
+  // ============================================================
+  function initProjectGallery() {
+    var wrap = $('#projectScroll');
+    var track = $('#projectTrack');
+    if (!wrap || !track) return;
+    var cards = $$('.pcard', track);
+    var bar = $('#projectBar');
+    var idx = $('#projectIndex');
+
+    if (finePointer) {
+      cards.forEach(function (card) {
+        card.addEventListener('pointermove', function (e) {
+          var r = card.getBoundingClientRect();
+          card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+          card.style.setProperty('--my', (e.clientY - r.top) + 'px');
         });
-      }
+      });
     }
 
-    function frameFn() {
-      ctx.clearRect(0, 0, w, h);
-      for (var i = 0; i < particles.length; i++) {
-        var p = particles[i];
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0 || p.x > w) p.vx *= -1;
-        if (p.y < 0 || p.y > h) p.vy *= -1;
+    // Without Motion or with reduced motion, keep the swipeable row
+    if (!M || reduceMotion) return;
 
-        for (var j = i + 1; j < particles.length; j++) {
-          var q = particles[j];
-          var dx = p.x - q.x, dy = p.y - q.y;
-          var d = Math.sqrt(dx * dx + dy * dy);
-          if (d < LINK) {
-            ctx.strokeStyle = 'rgba(255, 59, 78, ' + (0.16 * (1 - d / LINK)) + ')';
-            ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
-          }
-        }
+    wrap.classList.add('hscroll--pinned');
+    var hint = $('#projectHint');
+    if (hint) hint.textContent = 'Scroll to explore';
+    var stops = [];
+    var dist = 0;
+    var lastWidth = 0;
 
-        var mx = p.x - mouse.x, my = p.y - mouse.y;
-        var md = Math.sqrt(mx * mx + my * my);
-        if (md < LINK_MOUSE) {
-          ctx.strokeStyle = 'rgba(255, 138, 92, ' + (0.35 * (1 - md / LINK_MOUSE)) + ')';
-          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
-        }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
 
-        ctx.fillStyle = 'rgba(255, 90, 105, 0.75)';
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
-      }
-      if (running) rafId = window.requestAnimationFrame(frameFn);
+  function build() {
+      stops.forEach(function (stop) { stop(); });
+      stops = [];
+      track.style.transform = '';
+      dist = Math.max(0, track.scrollWidth - document.documentElement.clientWidth);
+      wrap.style.setProperty('--hscroll-dist', dist + 'px');
+      lastWidth = window.innerWidth;
+
+      var opts = { target: wrap, offset: ['start start', 'end end'] };
+      stops.push(scroll(animate(track, { x: [0, -dist] }, { ease: 'linear' }), opts));
+      stops.push(scroll(function (progress) {
+        if (bar) bar.style.transform = 'scaleX(' + (0.2 + 0.8 * progress) + ')';
+        if (idx) idx.textContent = pad(Math.min(cards.length, Math.round(progress * (cards.length - 1)) + 1));
+      }, opts));
     }
 
-    function play() { if (!running) { running = true; rafId = window.requestAnimationFrame(frameFn); } }
-    function pause() { running = false; window.cancelAnimationFrame(rafId); }
+    build();
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      if (window.innerWidth === lastWidth) return; // ignore mobile address-bar height changes
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(build, 200);
+    });
 
-    if (trackMouse) {
+    // Keyboard users: bring a focused card into view instead of leaving it off-screen
+    var sticky = $('#projectSticky');
+    track.addEventListener('focusin', function (e) {
+      var card = e.target.closest('.pcard');
+      if (sticky) sticky.scrollLeft = 0; // browsers without overflow: clip may scroll it on focus
+      if (!card || dist === 0) return;
+      var first = cards[0].offsetLeft;
+      var x = Math.min(dist, Math.max(0, card.offsetLeft - first));
+      var wrapTop = wrap.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: wrapTop + x, behavior: 'auto' });
+    });
+  }
+
+  // ============================================================
+  // Particle sphere renderer (canvas 2D, no dependencies)
+  // ============================================================
+  function startOrb(canvas, opts) {
+    var ctx = canvas.getContext('2d');
+    var PALETTE = [
+      [255, 240, 241], [255, 214, 196], [255, 170, 120], [255, 138, 92],
+      [255, 96, 80], [255, 59, 78], [214, 36, 58], [150, 20, 38]
+    ];
+    var COLORS = PALETTE.map(function (c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; });
+
+    var pts = [];
+  function addPoint(x, y, z, kind) {
+      pts.push({ x: x, y: y, z: z, kind: kind, s: Math.random(), tw: Math.random() * Math.PI * 2 });
+    }
+    // Shell: evenly spread with a Fibonacci lattice, plus slight jitter
+    var SHELL = 3600, golden = Math.PI * (3 - Math.sqrt(5));
+    for (var i = 0; i < SHELL; i++) {
+      var y = 1 - (i / (SHELL - 1)) * 2;
+      var r = Math.sqrt(1 - y * y);
+      var th = golden * i;
+      var j = 1 + (Math.random() - 0.5) * 0.03;
+      addPoint(Math.cos(th) * r * j, y * j, Math.sin(th) * r * j, 0);
+    }
+    // Core band: a flattened swirl through the middle
+    for (var b = 0; b < 1400; b++) {
+      var a = Math.random() * Math.PI * 2;
+      var rr = 0.12 + Math.pow(Math.random(), 0.7) * 0.68;
+      addPoint(Math.cos(a) * rr, (Math.random() - 0.5) * 0.09 * (1 - rr * 0.6), Math.sin(a) * rr, 1);
+    }
+    // Halo: sparse dust outside the shell
+    for (var h = 0; h < 520; h++) {
+      var u = Math.random() * 2 - 1, t2 = Math.random() * Math.PI * 2;
+      var rad = 1.06 + Math.pow(Math.random(), 1.8) * 0.5;
+      var rs = Math.sqrt(1 - u * u);
+      addPoint(Math.cos(t2) * rs * rad, u * rad, Math.sin(t2) * rs * rad, 2);
+    }
+
+    var w = 0, hgt = 0, dpr = 1, R = 0;
+  function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.clientWidth; hgt = canvas.clientHeight;
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(hgt * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      R = Math.min(w, hgt) * 0.38;
+    }
+
+    var rotY = 0.6, tiltX = 0.32, tiltZ = -0.12;
+    var target = { tiltX: 0.32, offY: 0 }, offY = 0;
+    var last = 0;
+
+  function draw(time) {
+      var dt = last ? Math.min(64, time - last) : 16;
+      last = time;
+      if (opts.animate) rotY += dt * 0.00018;
+      tiltX += (target.tiltX - tiltX) * 0.04;
+      offY += (target.offY - offY) * 0.04;
+
+      var cy = Math.cos(rotY + offY), sy = Math.sin(rotY + offY);
+      var cx = Math.cos(tiltX), sx = Math.sin(tiltX);
+      var cz = Math.cos(tiltZ), sz = Math.sin(tiltZ);
+      var breathe = 1 + Math.sin(time * 0.0009) * 0.012;
+      var bandSpin = time * 0.00035;
+      var ox = w / 2, oy = hgt / 2, F = 3.2;
+
+      ctx.clearRect(0, 0, w, hgt);
+      ctx.globalCompositeOperation = 'lighter';
+
+      for (var k = 0; k < pts.length; k++) {
+        var p = pts[k];
+        var px = p.x, py = p.y, pz = p.z;
+        if (p.kind === 1) { // the band swirls a little faster than the shell
+          var cb = Math.cos(bandSpin), sb = Math.sin(bandSpin);
+          var bx = px * cb - pz * sb; pz = px * sb + pz * cb; px = bx;
+        }
+        // rotate Y, then X (tilt), then Z
+        var x1 = px * cy - pz * sy, z1 = px * sy + pz * cy;
+        var y2 = py * cx - z1 * sx, z2 = py * sx + z1 * cx;
+        var x3 = x1 * cz - y2 * sz, y3 = x1 * sz + y2 * cz;
+
+        var scale = F / (F + z2) * R * breathe;
+        var sxp = ox + x3 * scale, syp = oy + y3 * scale;
+        var depth = (1 - z2) / 2; // 1 = front, 0 = back
+
+        // colour: lit from the upper-left, warmer and darker toward the lower-right
+        var light = (-x3 * 0.6 - y3 * 0.5 + 1) / 2;
+        var ci = Math.max(0, Math.min(7, Math.round((1 - light) * 6 + (p.kind === 2 ? 1 : 0))));
+        // limb brightening: shell points near the silhouette glow, like a lit edge
+        var rim = 1 - Math.abs(z2);
+        rim = rim * rim * rim;
+        var alpha;
+        if (p.kind === 0) alpha = 0.1 + depth * 0.4 + rim * 0.9;
+        else if (p.kind === 1) alpha = 0.35 + depth * 0.6;
+        else alpha = 0.1 + p.s * 0.3;
+        if (p.kind === 0 && rim > 0.45) ci = Math.max(0, ci - 2);
+        if (opts.animate) alpha *= 0.82 + 0.18 * Math.sin(time * 0.002 + p.tw);
+
+        var size = (p.kind === 2 ? 0.9 : 0.9 + p.s * 1.1) * (0.6 + depth * 0.7) * (p.kind === 0 ? 1 + rim * 0.6 : 1);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = COLORS[ci];
+        ctx.fillRect(sxp, syp, size, size);
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    var running = false, rafId = 0, onScreen = true;
+  function loop(t) { draw(t); if (running) rafId = requestAnimationFrame(loop); }
+  function play() { if (!running && opts.animate) { running = true; last = 0; rafId = requestAnimationFrame(loop); } }
+  function stop() { running = false; cancelAnimationFrame(rafId); }
+  function sync() {
+      if (onScreen && !document.hidden && !loops.paused) play(); else stop();
+    }
+
+    if (opts.trackMouse) {
       window.addEventListener('pointermove', function (e) {
-        var r = canvas.getBoundingClientRect();
-        mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+        target.tiltX = 0.32 + (e.clientY / window.innerHeight - 0.5) * 0.35;
+        target.offY = (e.clientX / window.innerWidth - 0.5) * 0.6;
       }, { passive: true });
     }
 
     var resizeTimer;
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(resize, 150);
+      resizeTimer = setTimeout(function () { resize(); if (!running) draw(performance.now()); }, 150);
     });
-
-    var heroVisible = true;
-    function sync() {
-      if (heroVisible && !document.hidden && !loops.paused) play(); else pause();
-    }
     if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        heroVisible = entries[0].isIntersecting;
-        sync();
-      }).observe(canvas.parentElement);
+      new IntersectionObserver(function (entries) { onScreen = entries[0].isIntersecting; sync(); }).observe(canvas);
     }
     document.addEventListener('visibilitychange', sync);
-    onLoopsChange(sync);
+    onLoopsChange(function () { sync(); if (!running) draw(performance.now()); });
 
     resize();
-    // Draw one still frame so a paused page still shows the network
-    frameFn();
+    draw(performance.now()); // a still frame first, so paused / reduced-motion visitors still see the orb
     sync();
   }
 })();
