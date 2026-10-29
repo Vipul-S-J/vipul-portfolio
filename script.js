@@ -533,9 +533,10 @@
   // ============================================================
   function startOrb(canvas, opts) {
     var ctx = canvas.getContext('2d');
+    // Sampled from the motion.dev orb: cream rim, yellow and amber body, orange shadow side
     var PALETTE = [
-      [255, 240, 241], [255, 214, 196], [255, 170, 120], [255, 138, 92],
-      [255, 96, 80], [255, 59, 78], [214, 36, 58], [150, 20, 38]
+      [251, 250, 238], [255, 252, 190], [255, 249, 138], [248, 189, 88],
+      [240, 150, 55], [230, 120, 30], [214, 98, 18], [160, 70, 12]
     ];
     var COLORS = PALETTE.map(function (c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; });
 
@@ -544,7 +545,7 @@
       pts.push({ x: x, y: y, z: z, kind: kind, s: Math.random(), tw: Math.random() * Math.PI * 2 });
     }
     // Shell: evenly spread with a Fibonacci lattice, plus slight jitter
-    var SHELL = 3600, golden = Math.PI * (3 - Math.sqrt(5));
+    var SHELL = 6000, golden = Math.PI * (3 - Math.sqrt(5));
     for (var i = 0; i < SHELL; i++) {
       var y = 1 - (i / (SHELL - 1)) * 2;
       var r = Math.sqrt(1 - y * y);
@@ -553,13 +554,13 @@
       addPoint(Math.cos(th) * r * j, y * j, Math.sin(th) * r * j, 0);
     }
     // Core band: a flattened swirl through the middle
-    for (var b = 0; b < 1400; b++) {
+    for (var b = 0; b < 2200; b++) {
       var a = Math.random() * Math.PI * 2;
       var rr = 0.12 + Math.pow(Math.random(), 0.7) * 0.68;
       addPoint(Math.cos(a) * rr, (Math.random() - 0.5) * 0.09 * (1 - rr * 0.6), Math.sin(a) * rr, 1);
     }
     // Halo: sparse dust outside the shell
-    for (var h = 0; h < 520; h++) {
+    for (var h = 0; h < 700; h++) {
       var u = Math.random() * 2 - 1, t2 = Math.random() * Math.PI * 2;
       var rad = 1.06 + Math.pow(Math.random(), 1.8) * 0.5;
       var rs = Math.sqrt(1 - u * u);
@@ -613,19 +614,21 @@
         var depth = (1 - z2) / 2; // 1 = front, 0 = back
 
         // colour: lit from the upper-left, warmer and darker toward the lower-right
-        var light = (-x3 * 0.6 - y3 * 0.5 + 1) / 2;
-        var ci = Math.max(0, Math.min(7, Math.round((1 - light) * 6 + (p.kind === 2 ? 1 : 0))));
+        // colour runs left to right like the motion.dev orb: cream-yellow on the left, orange on the right
+        var light = (-x3 * 0.85 - y3 * 0.15 + 1) / 2;
+        var ci = Math.max(0, Math.min(7, Math.round((1 - light) * 7 + (p.kind === 2 ? 1 : 0))));
         // limb brightening: shell points near the silhouette glow, like a lit edge
         var rim = 1 - Math.abs(z2);
         rim = rim * rim * rim;
         var alpha;
         if (p.kind === 0) alpha = 0.1 + depth * 0.4 + rim * 0.9;
-        else if (p.kind === 1) alpha = 0.35 + depth * 0.6;
+        else if (p.kind === 1) alpha = 0.55 + depth * 0.45;
         else alpha = 0.1 + p.s * 0.3;
-        if (p.kind === 0 && rim > 0.45) ci = Math.max(0, ci - 2);
+        if (p.kind === 0 && rim > 0.45 && x3 < 0) ci = Math.max(0, ci - 1); // only the lit (left) rim goes paler
+        if (p.kind === 1) ci = Math.max(2, Math.min(6, Math.round(2 + (x3 + 0.8) * 2.6)));
         if (opts.animate) alpha *= 0.82 + 0.18 * Math.sin(time * 0.002 + p.tw);
 
-        var size = (p.kind === 2 ? 0.9 : 0.9 + p.s * 1.1) * (0.6 + depth * 0.7) * (p.kind === 0 ? 1 + rim * 0.6 : 1);
+        var size = (p.kind === 2 ? 0.7 : 0.6 + p.s * 0.8) * (0.6 + depth * 0.7) * (p.kind === 0 ? 1 + rim * 0.5 : 1);
         ctx.globalAlpha = alpha;
         ctx.fillStyle = COLORS[ci];
         ctx.fillRect(sxp, syp, size, size);
