@@ -47,7 +47,7 @@
   <main id="main">
     <!-- Hero -->
     <section class="hero" id="home">
-      <canvas class="hero__canvas" id="heroCanvas" aria-hidden="true"></canvas>
+      <div class="orb" id="orb" aria-hidden="true"><canvas id="orbCanvas"></canvas></div>
 
       <div class="hero__grid" id="heroGrid">
         <div class="hero__copy">
@@ -69,22 +69,6 @@
             <a href="#contact" class="btn btn--ghost" data-press>Get in touch</a>
           </div>
         </div>
-
-        <!-- Illustrative deploy terminal -->
-        <div class="terminal" id="terminal" data-hero-visual role="img" aria-label="Illustration of a blue/green deployment running through GitLab CI, S3, and AWS CodeDeploy">
-          <div class="terminal__bar" aria-hidden="true">
-            <span></span><span></span><span></span>
-            <p>deploy — prod</p>
-          </div>
-          <ol class="terminal__body" aria-hidden="true">
-            <li><span class="t-prompt">~$</span> git push origin main</li>
-            <li><span class="t-ok">✓</span> GitLab CI <span class="t-dim">build &amp; test</span> <span class="t-tag">passed</span></li>
-            <li><span class="t-info">↑</span> artifact <span class="t-dim">→ s3://artifacts/app-srv-142.zip</span></li>
-            <li><span class="t-info">⟳</span> CodeDeploy <span class="t-dim">blue</span> → <span class="t-green">green</span></li>
-            <li class="t-progress"><span class="t-dim">ALB traffic</span> <span class="bar"><i id="trafficBar"></i></span> <b id="trafficPct">0%</b></li>
-            <li><span class="t-ok">✓</span> deployment succeeded <span class="t-tag t-tag--ok">0 downtime</span></li>
-          </ol>
-        </div>
       </div>
 
       <ul class="stats" id="stats">
@@ -104,77 +88,110 @@
     </section>
 
     <!-- Projects -->
-    <section class="section" id="projects">
-      <header class="section__head" data-reveal>
+    <section class="projects-section" id="projects">
+      <header class="section__head section__head--projects" data-reveal>
         <span class="section__num">01</span>
         <h2 class="section__title">Things I've built</h2>
       </header>
 
-      <!-- Featured projects -->
-      <div class="featured">
-        <article class="feature card" data-reveal data-tilt>
-          <div class="feature__top">
-            <img class="proj-icon" src="assets/icons/codedeploy.svg" alt="AWS CodeDeploy" width="52" height="52" loading="lazy" />
-            <span class="feature__label">Featured project</span>
-          </div>
-          <h3>AWS Blue/Green CI/CD Automation</h3>
-          <p>Zero-downtime blue/green deployments with AWS CodeDeploy, fed by a GitLab CI → S3 artifact pipeline. Runs on a mixed-instances Auto Scaling Group that blends Graviton and x86 across On-Demand and Spot for cost and resilience.</p>
-          <ol class="flow" data-flow aria-label="Pipeline: GitLab CI, then S3, then CodeDeploy, then ALB">
-            <li><span>GitLab CI</span></li><li><span>S3</span></li><li><span>CodeDeploy</span></li><li><span>ALB</span></li>
+      <div class="hscroll" id="projectScroll">
+        <div class="hscroll__sticky" id="projectSticky">
+          <ol class="hscroll__track" id="projectTrack" aria-label="Projects">
+            <li class="pcard" style="--item-color: #C925D1">
+              <article class="pcard__inner">
+                <div class="pcard__top">
+                  <img class="pcard__icon" src="assets/icons/codedeploy.svg" alt="AWS CodeDeploy" width="56" height="56" loading="lazy" />
+                  <span class="pcard__num" aria-hidden="true">01</span>
+                </div>
+                <p class="pcard__kind">Featured</p>
+                <h3 class="pcard__title">AWS Blue/Green CI/CD Automation</h3>
+                <p class="pcard__desc">Zero-downtime blue/green deployments with AWS CodeDeploy, fed by a GitLab CI → S3 artifact pipeline, on a mixed-instances Auto Scaling Group that blends Graviton and x86 across On-Demand and Spot.</p>
+                <ol class="flow" data-flow aria-label="Pipeline: GitLab CI, then S3, then CodeDeploy, then ALB"><li><span>GitLab CI</span></li><li><span>S3</span></li><li><span>CodeDeploy</span></li><li><span>ALB</span></li></ol>
+                <div class="pcard__foot">
+                  <ul class="tags"><li>CodeDeploy</li><li>GitLab CI/CD</li><li>Auto Scaling</li><li>Spot</li></ul>
+                  <a class="gh-btn" href="https://github.com/Vipul-S-J/aws-bluegreen-cicd" target="_blank" rel="noopener" data-press>
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                    View on GitHub
+                  </a>
+                </div>
+              </article>
+            </li>
+            <li class="pcard" style="--item-color: #DD344C">
+              <article class="pcard__inner">
+                <div class="pcard__top">
+                  <img class="pcard__icon" src="assets/icons/ses.svg" alt="Amazon Simple Email Service" width="56" height="56" loading="lazy" />
+                  <span class="pcard__num" aria-hidden="true">02</span>
+                </div>
+                <p class="pcard__kind">Featured</p>
+                <h3 class="pcard__title">SES Email Analytics Pipeline</h3>
+                <p class="pcard__desc">A serverless pipeline that captures Amazon SES events (sends, deliveries, opens, clicks, bounces) in near real time and makes them queryable with SQL. Provisioned with Terraform.</p>
+                <ol class="flow" data-flow aria-label="Pipeline: SES, then Kinesis Firehose, then S3, then Athena"><li><span>SES</span></li><li><span>Firehose</span></li><li><span>S3</span></li><li><span>Athena</span></li></ol>
+                <div class="pcard__foot">
+                  <ul class="tags"><li>SES</li><li>Kinesis Firehose</li><li>Athena</li><li>Terraform</li></ul>
+                  <a class="gh-btn" href="https://github.com/Vipul-S-J/ses-email-analytics-pipeline" target="_blank" rel="noopener" data-press>
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                    View on GitHub
+                  </a>
+                </div>
+              </article>
+            </li>
+            <li class="pcard" style="--item-color: #C925D1">
+              <article class="pcard__inner">
+                <div class="pcard__top">
+                  <img class="pcard__icon" src="assets/icons/dms.svg" alt="AWS Database Migration Service" width="56" height="56" loading="lazy" />
+                  <span class="pcard__num" aria-hidden="true">03</span>
+                </div>
+                <p class="pcard__kind">Work</p>
+                <h3 class="pcard__title">Zero-Downtime DB Migration</h3>
+                <p class="pcard__desc">Migrated a production MongoDB workload to Amazon DocumentDB using AWS DMS, with full data validation and minimal downtime.</p>
+                <ol class="flow" data-flow aria-label="Migration: MongoDB, then AWS DMS, then DocumentDB"><li><span>MongoDB</span></li><li><span>AWS DMS</span></li><li><span>DocumentDB</span></li></ol>
+                <div class="pcard__foot">
+                  <ul class="tags"><li>AWS DMS</li><li>DocumentDB</li><li>MongoDB</li></ul>
+                </div>
+              </article>
+            </li>
+            <li class="pcard" style="--item-color: #8C4FFF">
+              <article class="pcard__inner">
+                <div class="pcard__top">
+                  <img class="pcard__icon" src="assets/icons/vpc.svg" alt="Amazon VPC" width="56" height="56" loading="lazy" />
+                  <span class="pcard__num" aria-hidden="true">04</span>
+                </div>
+                <p class="pcard__kind">Work</p>
+                <h3 class="pcard__title">Secure VPC Architecture</h3>
+                <p class="pcard__desc">Multi-subnet VPCs with NAT gateways, VPN, IAM least-privilege, and WAF rules protecting production web applications.</p>
+                <ol class="flow" data-flow aria-label="Request path: Route 53, then WAF, then ALB, then EC2 in private subnets"><li><span>Route 53</span></li><li><span>WAF</span></li><li><span>ALB</span></li><li><span>EC2</span></li></ol>
+                <div class="pcard__foot">
+                  <ul class="tags"><li>VPC</li><li>IAM</li><li>WAF</li><li>Route 53</li></ul>
+                </div>
+              </article>
+            </li>
+            <li class="pcard" style="--item-color: #FF3B4E">
+              <article class="pcard__inner">
+                <div class="pcard__top">
+                  <img class="pcard__icon" src="assets/icons/aws-cloud.svg" alt="AWS Cloud" width="56" height="56" loading="lazy" />
+                  <span class="pcard__num" aria-hidden="true">05</span>
+                </div>
+                <p class="pcard__kind">Repository</p>
+                <h3 class="pcard__title">More AWS projects</h3>
+                <p class="pcard__desc">Hands-on infrastructure, automation, and security builds collected in one repository.</p>
+                <div class="pcard__foot">
+                  <ul class="tags"><li>AWS</li><li>IaC</li><li>Automation</li><li>Security</li></ul>
+                  <a class="gh-btn" href="https://github.com/Vipul-S-J/AWS_Projects" target="_blank" rel="noopener" data-press>
+                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                    Browse the repo
+                  </a>
+                </div>
+              </article>
+            </li>
           </ol>
-          <div class="feature__foot">
-            <ul class="tags"><li>CodeDeploy</li><li>GitLab CI/CD</li><li>Auto Scaling</li><li>Spot</li><li>ALB</li></ul>
-            <a class="gh-btn" href="https://github.com/Vipul-S-J/aws-bluegreen-cicd" target="_blank" rel="noopener" data-press>
-              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-              View on GitHub
-            </a>
+          <div class="hscroll__meta" id="projectMeta" aria-hidden="true">
+            <span class="hscroll__count"><b id="projectIndex">01</b> / 05</span>
+            <span class="hscroll__bar"><i id="projectBar"></i></span>
+            <span class="hscroll__hint" id="projectHint">Swipe to see more</span>
           </div>
-        </article>
-
-        <article class="feature card" data-reveal data-tilt>
-          <div class="feature__top">
-            <img class="proj-icon" src="assets/icons/ses.svg" alt="Amazon Simple Email Service" width="52" height="52" loading="lazy" />
-            <span class="feature__label">Featured project</span>
-          </div>
-          <h3>SES Email Analytics Pipeline</h3>
-          <p>A serverless pipeline that captures Amazon SES events (sends, deliveries, opens, clicks, bounces) in near real time and makes them queryable with SQL. No servers to manage; provisioned with Terraform.</p>
-          <ol class="flow" data-flow aria-label="Pipeline: SES, then Kinesis Firehose, then S3, then Athena">
-            <li><span>SES</span></li><li><span>Firehose</span></li><li><span>S3</span></li><li><span>Athena</span></li>
-          </ol>
-          <div class="feature__foot">
-            <ul class="tags"><li>SES</li><li>Kinesis Firehose</li><li>S3</li><li>Athena</li><li>Terraform</li></ul>
-            <a class="gh-btn" href="https://github.com/Vipul-S-J/ses-email-analytics-pipeline" target="_blank" rel="noopener" data-press>
-              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-              View on GitHub
-            </a>
-          </div>
-        </article>
+        </div>
       </div>
 
-      <!-- More projects -->
-      <div class="projects" data-stagger>
-        <article class="proj-card card" data-tilt>
-          <img class="proj-icon" src="assets/icons/dms.svg" alt="AWS Database Migration Service" width="44" height="44" loading="lazy" />
-          <h3>Zero-Downtime DB Migration</h3>
-          <p>Migrated a production MongoDB workload to Amazon DocumentDB using AWS DMS with full data validation and minimal downtime.</p>
-          <ul class="tags"><li>AWS DMS</li><li>DocumentDB</li><li>MongoDB</li></ul>
-        </article>
-        <article class="proj-card card" data-tilt>
-          <img class="proj-icon" src="assets/icons/vpc.svg" alt="Amazon VPC" width="44" height="44" loading="lazy" />
-          <h3>Secure VPC Architecture</h3>
-          <p>Multi-subnet VPCs with NAT gateways, VPN, IAM least-privilege, and WAF rules protecting production web applications.</p>
-          <ul class="tags"><li>VPC</li><li>IAM</li><li>WAF</li><li>Route 53</li></ul>
-        </article>
-        <a class="proj-card proj-card--more card" href="https://github.com/Vipul-S-J/AWS_Projects" target="_blank" rel="noopener" data-tilt>
-          <img class="proj-icon" src="assets/icons/aws-cloud.svg" alt="AWS Cloud" width="44" height="44" loading="lazy" />
-          <h3>More AWS projects</h3>
-          <p>Hands-on infrastructure, automation, and security builds collected in one repository.</p>
-          <span class="more-link">
-            Browse the repo
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"/></svg>
-          </span>
-        </a>
-      </div>
     </section>
 
     <!-- Experience -->
