@@ -336,13 +336,35 @@
   // ----------------------------------------------------------
   // Reveal on scroll
   // ----------------------------------------------------------
-  inView('[data-reveal]', function (el) {
+  function revealOne(el) {
+    if (el.dataset.shown) return;
+    el.dataset.shown = '1';
     enter(el, 32, 0);
-  }, { margin: '0px 0px -12% 0px' });
-
-  inView('[data-stagger]', function (el) {
+  }
+  function revealGroup(el) {
+    if (el.dataset.shown) return;
+    el.dataset.shown = '1';
     enter(Array.prototype.slice.call(el.children), 24, stagger(0.07));
-  }, { margin: '0px 0px -10% 0px' });
+  }
+  inView('[data-reveal]', revealOne, { margin: '0px 0px -12% 0px' });
+  inView('[data-stagger]', revealGroup, { margin: '0px 0px -10% 0px' });
+
+  // A very fast scroll (or a jump from a nav link) can carry an element past the
+  // viewport between two observer checks. Once scrolling settles, show anything
+  // that is now above the bottom of the screen but was never revealed.
+  var catchUpTimer;
+  window.addEventListener('scroll', function () {
+    clearTimeout(catchUpTimer);
+    catchUpTimer = setTimeout(function () {
+      var limit = window.innerHeight;
+      $$('[data-reveal]:not([data-shown])').forEach(function (el) {
+        if (el.getBoundingClientRect().top < limit) revealOne(el);
+      });
+      $$('[data-stagger]:not([data-shown])').forEach(function (el) {
+        if (el.getBoundingClientRect().top < limit) revealGroup(el);
+      });
+    }, 150);
+  }, { passive: true });
 
   $$('[data-flow]').forEach(function (flow) {
     $$('li', flow).forEach(function (li, i) { li.style.setProperty('--i', i); });
@@ -545,7 +567,9 @@
       pts.push({ x: x, y: y, z: z, kind: kind, s: Math.random(), tw: Math.random() * Math.PI * 2 });
     }
     // Shell: evenly spread with a Fibonacci lattice, plus slight jitter
-    var SHELL = 6000, golden = Math.PI * (3 - Math.sqrt(5));
+    // Fewer dots on smaller orbs (phones), so each frame stays cheap; full density at ~600px
+    var density = Math.max(0.4, Math.min(1, Math.pow((canvas.clientWidth || 600) / 600, 2)));
+    var SHELL = Math.round(6000 * density), golden = Math.PI * (3 - Math.sqrt(5));
     for (var i = 0; i < SHELL; i++) {
       var y = 1 - (i / (SHELL - 1)) * 2;
       var r = Math.sqrt(1 - y * y);
@@ -554,13 +578,13 @@
       addPoint(Math.cos(th) * r * j, y * j, Math.sin(th) * r * j, 0);
     }
     // Core band: a flattened swirl through the middle
-    for (var b = 0; b < 2200; b++) {
+    for (var b = 0, BAND = Math.round(2200 * density); b < BAND; b++) {
       var a = Math.random() * Math.PI * 2;
       var rr = 0.12 + Math.pow(Math.random(), 0.7) * 0.68;
       addPoint(Math.cos(a) * rr, (Math.random() - 0.5) * 0.09 * (1 - rr * 0.6), Math.sin(a) * rr, 1);
     }
     // Halo: sparse dust outside the shell
-    for (var h = 0; h < 700; h++) {
+    for (var h = 0, HALO = Math.round(700 * density); h < HALO; h++) {
       var u = Math.random() * 2 - 1, t2 = Math.random() * Math.PI * 2;
       var rad = 1.06 + Math.pow(Math.random(), 1.8) * 0.5;
       var rs = Math.sqrt(1 - u * u);
