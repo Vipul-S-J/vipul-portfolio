@@ -458,8 +458,8 @@
     var orb = $('#orb'), hero = $('#home'), stats = $('#stats');
     if (!orb || !hero || !stats) return;
     var vw = document.documentElement.clientWidth;
-    var MARGIN = 28;
-    var SPHERE = 0.82; // visible sphere height as a share of the canvas size
+    var MARGIN = 36;
+    var SPHERE = 0.95; // visible height of the outer shell as a share of the canvas size
     var heroTop = hero.getBoundingClientRect().top;
     var regionTop = ((nav && nav.offsetHeight) || 72) + MARGIN;
     var regionBot = stats.getBoundingClientRect().top - heroTop - MARGIN;
@@ -564,7 +564,8 @@
 
     var pts = [];
   function addPoint(x, y, z, kind) {
-      pts.push({ x: x, y: y, z: z, kind: kind, s: Math.random(), tw: Math.random() * Math.PI * 2 });
+      var len = Math.sqrt(x * x + y * y + z * z) || 1;
+      pts.push({ x: x, y: y, z: z, r: kind === 3 ? len : 1, kind: kind, s: Math.random(), tw: Math.random() * Math.PI * 2 });
     }
     // Shell: evenly spread with a Fibonacci lattice, plus slight jitter
     // Fewer dots on smaller orbs (phones), so each frame stays cheap; full density at ~600px
@@ -583,10 +584,21 @@
       var rr = 0.12 + Math.pow(Math.random(), 0.7) * 0.68;
       addPoint(Math.cos(a) * rr, (Math.random() - 0.5) * 0.09 * (1 - rr * 0.6), Math.sin(a) * rr, 1);
     }
-    // Halo: sparse dust outside the shell
-    for (var h = 0, HALO = Math.round(700 * density); h < HALO; h++) {
+    // Outer shell: the same lattice at 1.3x the radius, but only about a quarter
+    // of the points (a stable random subset), so it reads as a thin, faint layer
+    var OUTER = 1.3;
+    for (var o = 0; o < SHELL; o++) {
+      if (Math.random() < 0.7) continue;
+      var oy = 1 - (o / (SHELL - 1)) * 2;
+      var orr = Math.sqrt(1 - oy * oy);
+      var oth = golden * o + 0.5;
+      var oj = OUTER * (1 + (Math.random() - 0.5) * 0.04);
+      addPoint(Math.cos(oth) * orr * oj, oy * oj, Math.sin(oth) * orr * oj, 3);
+    }
+    // Halo: sparse dust between and just outside the two shells
+    for (var h = 0, HALO = Math.round(450 * density); h < HALO; h++) {
       var u = Math.random() * 2 - 1, t2 = Math.random() * Math.PI * 2;
-      var rad = 1.06 + Math.pow(Math.random(), 1.8) * 0.5;
+      var rad = 1.04 + Math.pow(Math.random(), 1.6) * 0.38;
       var rs = Math.sqrt(1 - u * u);
       addPoint(Math.cos(t2) * rs * rad, u * rad, Math.sin(t2) * rs * rad, 2);
     }
@@ -597,7 +609,7 @@
       w = canvas.clientWidth; hgt = canvas.clientHeight;
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(hgt * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      R = Math.min(w, hgt) * 0.38;
+      R = Math.min(w, hgt) * 0.36;
     }
 
     var rotY = 0.6, tiltX = 0.32, tiltZ = -0.12;
@@ -635,24 +647,37 @@
 
         var scale = F / (F + z2) * R * breathe;
         var sxp = ox + x3 * scale, syp = oy + y3 * scale;
-        var depth = (1 - z2) / 2; // 1 = front, 0 = back
+        var depth = (1 - z2 / p.r) / 2; // 1 = front, 0 = back
 
         // colour: lit from the upper-left, warmer and darker toward the lower-right
         // colour runs left to right like the motion.dev orb: cream-yellow on the left, orange on the right
         var light = (-x3 * 0.85 - y3 * 0.15 + 1) / 2;
         var ci = Math.max(0, Math.min(7, Math.round((1 - light) * 7 + (p.kind === 2 ? 1 : 0))));
         // limb brightening: shell points near the silhouette glow, like a lit edge
-        var rim = 1 - Math.abs(z2);
+        var rim = 1 - Math.min(1, Math.abs(z2) / p.r);
         rim = rim * rim * rim;
+        // Shadow that falls across the lower right of the sphere
+        var lowerRight = Math.max(0, Math.min(1, (x3 * 0.55 + y3 * 0.85) / (0.85 * p.r)));
         var alpha;
-        if (p.kind === 0) alpha = 0.1 + depth * 0.4 + rim * 0.9;
-        else if (p.kind === 1) alpha = 0.55 + depth * 0.45;
-        else alpha = 0.1 + p.s * 0.3;
+        if (p.kind === 0) {
+          // Inner orb: dark face, light concentrated on the rim
+          alpha = 0.03 + depth * 0.12 + rim * 1.0;
+          alpha *= 1 - lowerRight * 0.8 * (1 - rim * 0.55);
+        } else if (p.kind === 1) {
+          alpha = 0.55 + depth * 0.45;
+        } else if (p.kind === 3) {
+          // Outer shell: faint, with a thin brighter outline
+          alpha = (0.16 + depth * 0.1 + rim * 0.55) * (0.6 + p.s * 0.4);
+          alpha *= 1 - lowerRight * 0.55;
+        } else {
+          alpha = 0.06 + p.s * 0.2;
+        }
         if (p.kind === 0 && rim > 0.45 && x3 < 0) ci = Math.max(0, ci - 1); // only the lit (left) rim goes paler
         if (p.kind === 1) ci = Math.max(2, Math.min(6, Math.round(2 + (x3 + 0.8) * 2.6)));
         if (opts.animate) alpha *= 0.82 + 0.18 * Math.sin(time * 0.002 + p.tw);
 
-        var size = (p.kind === 2 ? 0.7 : 0.6 + p.s * 0.8) * (0.6 + depth * 0.7) * (p.kind === 0 ? 1 + rim * 0.5 : 1);
+        var size = (p.kind === 2 ? 0.7 : p.kind === 3 ? 0.55 + p.s * 0.6 : 0.6 + p.s * 0.8)
+          * (0.6 + depth * 0.7) * (p.kind === 0 || p.kind === 3 ? 1 + rim * 0.5 : 1);
         ctx.globalAlpha = alpha;
         ctx.fillStyle = COLORS[ci];
         ctx.fillRect(sxp, syp, size, size);
