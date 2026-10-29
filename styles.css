@@ -239,8 +239,8 @@ main { overflow-x: clip; }
 /* ---------- Hero orb (particle sphere) ---------- */
 .orb {
   position: absolute; z-index: 0; pointer-events: none;
-  top: 50%; right: max(-5vw, -70px);
-  width: min(50vw, 660px); aspect-ratio: 1;
+  top: 50%; right: max(-4vw, -60px);
+  width: min(42vw, 560px); aspect-ratio: 1;
   translate: 0 -62%;
 }
 .orb canvas { display: block; width: 100%; height: 100%; opacity: var(--orb-dim, 1); }
