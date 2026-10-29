@@ -423,7 +423,38 @@
 
   function startOrbIfPresent() {
     var orbCanvas = $('#orbCanvas');
-    if (orbCanvas && orbCanvas.getContext) startOrb(orbCanvas, { animate: !reduceMotion, trackMouse: finePointer && !reduceMotion });
+    if (!orbCanvas || !orbCanvas.getContext) return;
+    fitOrb();
+    window.addEventListener('resize', fitOrb);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitOrb);
+    startOrb(orbCanvas, { animate: !reduceMotion, trackMouse: finePointer && !reduceMotion });
+  }
+
+  // Size the orb to the free space between the nav bar and the stats row,
+  // so the sphere never runs under either of them.
+  function fitOrb() {
+    var orb = $('#orb'), hero = $('#home'), stats = $('#stats');
+    if (!orb || !hero || !stats) return;
+    var vw = document.documentElement.clientWidth;
+    var MARGIN = 28;
+    var SPHERE = 0.82; // visible sphere height as a share of the canvas size
+    var heroTop = hero.getBoundingClientRect().top;
+    var regionTop = ((nav && nav.offsetHeight) || 72) + MARGIN;
+    var regionBot = stats.getBoundingClientRect().top - heroTop - MARGIN;
+    var cap = vw <= 768 ? vw * 1.05 : vw <= 1024 ? Math.min(vw * 0.8, 560) : Math.min(vw * 0.46, 620);
+    var size;
+    var top;
+    if (vw <= 768) {
+      // Phones: the stats sit far below, so just keep the top clear of the nav bar
+      size = cap;
+      top = regionTop - size * (1 - SPHERE) / 2;
+    } else {
+      size = Math.max(240, Math.min(cap, (regionBot - regionTop) / SPHERE));
+      top = (regionTop + regionBot) / 2 - size / 2;
+    }
+    orb.style.width = Math.round(size) + 'px';
+    orb.style.top = Math.round(top) + 'px';
+    orb.style.translate = 'none';
   }
 
 
@@ -618,11 +649,17 @@
       }, { passive: true });
     }
 
-    var resizeTimer;
-    window.addEventListener('resize', function () {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () { resize(); if (!running) draw(performance.now()); }, 150);
-    });
+    // Redraw whenever the canvas changes size (window resize or fitOrb)
+    function onCanvasResize() { resize(); if (!running) draw(performance.now()); }
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(onCanvasResize).observe(canvas);
+    } else {
+      var resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(onCanvasResize, 150);
+      });
+    }
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (entries) { onScreen = entries[0].isIntersecting; sync(); }).observe(canvas);
     }
