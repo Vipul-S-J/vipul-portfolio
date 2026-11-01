@@ -758,11 +758,14 @@
   // ============================================================
   function startOrb(canvas, opts) {
     var ctx = canvas.getContext('2d');
-    // Sampled from the motion.dev orb: cream rim, yellow and amber body, orange shadow side
+    // Deep gold body: a pale rim on the lit side falling away to burnt orange and ember in shadow
     var PALETTE = [
-      [251, 250, 238], [255, 252, 190], [255, 249, 138], [248, 189, 88],
-      [240, 150, 55], [230, 120, 30], [214, 98, 18], [160, 70, 12]
+      [253, 236, 170], [255, 214, 102], [250, 178, 54], [232, 140, 30],
+      [205, 108, 22], [168, 78, 16], [126, 54, 12], [84, 34, 10]
     ];
+    // "VSJ" dots run left to right from pale gold to amber
+    var TEXT_PALETTE = [[255, 238, 170], [255, 222, 118], [252, 198, 72], [246, 172, 46], [236, 148, 32], [222, 124, 24]];
+    var TEXT_COLORS = TEXT_PALETTE.map(function (c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; });
     var COLORS = PALETTE.map(function (c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; });
 
     var pts = [];
@@ -780,12 +783,6 @@
       var th = golden * i;
       var j = 1 + (Math.random() - 0.5) * 0.03;
       addPoint(Math.cos(th) * r * j, y * j, Math.sin(th) * r * j, 0);
-    }
-    // Core band: a flattened swirl through the middle
-    for (var b = 0, BAND = Math.round(2200 * density); b < BAND; b++) {
-      var a = Math.random() * Math.PI * 2;
-      var rr = 0.12 + Math.pow(Math.random(), 0.7) * 0.68;
-      addPoint(Math.cos(a) * rr, (Math.random() - 0.5) * 0.09 * (1 - rr * 0.6), Math.sin(a) * rr, 1);
     }
     // Outer shell: the same lattice at 1.3x the radius, but only about a quarter
     // of the points (a stable random subset), so it reads as a thin, faint layer
@@ -806,6 +803,46 @@
       addPoint(Math.cos(t2) * rs * rad, u * rad, Math.sin(t2) * rs * rad, 2);
     }
 
+    // "VSJ" in the middle, built from dots sampled off a hidden canvas. It faces the viewer
+    // and only sways a little while the shell turns around it (kind 4 in draw).
+    function buildText() {
+      pts = pts.filter(function (q) { return q.kind !== 4; });
+      var TW = 420, TH = 170, WORLD_W = 1.62, k = WORLD_W / TW;
+      var tc = document.createElement('canvas');
+      tc.width = TW; tc.height = TH;
+      var tx = tc.getContext('2d', { willReadFrequently: true });
+      var size = 150, family = '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif';
+      tx.textAlign = 'center'; tx.textBaseline = 'middle'; tx.fillStyle = '#fff';
+      if ('letterSpacing' in tx) tx.letterSpacing = '8px';
+      for (; size > 60; size -= 6) {
+        tx.font = '700 ' + size + 'px ' + family;
+        if (tx.measureText('VSJ').width <= TW - 30) break;
+      }
+      tx.fillText('VSJ', TW / 2, TH / 2 + size * 0.04);
+      var data = tx.getImageData(0, 0, TW, TH).data, step = 3;
+      for (var py = 0; py < TH; py += step) {
+        for (var pxl = 0; pxl < TW; pxl += step) {
+          if (data[(py * TW + pxl) * 4 + 3] < 140) continue;
+          var frac = pxl / TW;
+          pts.push({
+            x: (pxl - TW / 2 + (Math.random() - 0.5) * 0.9) * k,
+            y: (py - TH / 2 + (Math.random() - 0.5) * 0.9) * k,
+            z: (Math.random() - 0.5) * 0.05,
+            r: 1, kind: 4, s: Math.random(), tw: Math.random() * Math.PI * 2,
+            ci: Math.max(0, Math.min(5, Math.floor(((frac - 0.15) / 0.7) * 6 + (Math.random() - 0.5)))),
+            sz: 1.1 + Math.random() * 0.8
+          });
+        }
+      }
+    }
+    buildText();
+    // The page font may arrive after the first build: rebuild once it is ready
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load('700 120px "IBM Plex Sans"').then(function () {
+        buildText();
+        if (!running) draw(performance.now());
+      }, function () {});
+    }
     var w = 0, hgt = 0, dpr = 1, R = 0;
   function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -830,7 +867,10 @@
       var cx = Math.cos(tiltX), sx = Math.sin(tiltX);
       var cz = Math.cos(tiltZ), sz = Math.sin(tiltZ);
       var breathe = 1 + Math.sin(time * 0.0009) * 0.012;
-      var bandSpin = time * 0.00035;
+      // The lettering only sways (and follows the mouse a little), so it stays readable
+      var sway = Math.sin(time * 0.0004) * 0.1 + offY * 0.6;
+      var cyT = Math.cos(sway), syT = Math.sin(sway), cxT = Math.cos(tiltX * 0.35), sxT = Math.sin(tiltX * 0.35);
+      var textScale = Math.max(0.7, Math.min(1.15, R / 200));
       var ox = w / 2, oy = hgt / 2, F = 3.2;
 
       ctx.clearRect(0, 0, w, hgt);
@@ -838,11 +878,16 @@
 
       for (var k = 0; k < pts.length; k++) {
         var p = pts[k];
-        var px = p.x, py = p.y, pz = p.z;
-        if (p.kind === 1) { // the band swirls a little faster than the shell
-          var cb = Math.cos(bandSpin), sb = Math.sin(bandSpin);
-          var bx = px * cb - pz * sb; pz = px * sb + pz * cb; px = bx;
+        if (p.kind === 4) {
+          var t1 = p.x * cyT - p.z * syT, tz1 = p.x * syT + p.z * cyT;
+          var t2y = p.y * cxT - tz1 * sxT, tz2 = p.y * sxT + tz1 * cxT;
+          var tsc = F / (F + tz2) * R * breathe;
+          ctx.globalAlpha = (0.9 + (opts.animate ? 0.1 * Math.sin(time * 0.0021 + p.tw) : 0.05)) * (0.85 + p.s * 0.15);
+          ctx.fillStyle = TEXT_COLORS[p.ci];
+          ctx.fillRect(ox + t1 * tsc, oy + t2y * tsc, p.sz * textScale, p.sz * textScale);
+          continue;
         }
+        var px = p.x, py = p.y, pz = p.z;
         // rotate Y, then X (tilt), then Z
         var x1 = px * cy - pz * sy, z1 = px * sy + pz * cy;
         var y2 = py * cx - z1 * sx, z2 = py * sx + z1 * cx;
@@ -864,19 +909,16 @@
         var alpha;
         if (p.kind === 0) {
           // Inner orb: dark face, light concentrated on the rim
-          alpha = 0.07 + depth * 0.22 + rim * 1.25;
-          alpha *= 1 - lowerRight * 0.65 * (1 - rim * 0.55);
-        } else if (p.kind === 1) {
-          alpha = 0.75 + depth * 0.45;
+          alpha = 0.06 + depth * 0.19 + rim * 1.1;
+          alpha *= 1 - lowerRight * 0.7 * (1 - rim * 0.55);
         } else if (p.kind === 3) {
           // Outer shell: faint, with a thin brighter outline
-          alpha = (0.24 + depth * 0.14 + rim * 0.7) * (0.6 + p.s * 0.4);
+          alpha = (0.18 + depth * 0.1 + rim * 0.55) * (0.6 + p.s * 0.4);
           alpha *= 1 - lowerRight * 0.45;
         } else {
-          alpha = 0.1 + p.s * 0.28;
+          alpha = 0.08 + p.s * 0.22;
         }
         if (p.kind === 0 && rim > 0.45 && x3 < 0) ci = Math.max(0, ci - 1); // only the lit (left) rim goes paler
-        if (p.kind === 1) ci = Math.max(2, Math.min(6, Math.round(2 + (x3 + 0.8) * 2.6)));
         if (opts.animate) alpha *= 0.82 + 0.18 * Math.sin(time * 0.002 + p.tw);
 
         var size = (p.kind === 2 ? 0.7 : p.kind === 3 ? 0.55 + p.s * 0.6 : 0.6 + p.s * 0.8)

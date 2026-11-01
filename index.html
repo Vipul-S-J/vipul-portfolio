@@ -63,7 +63,7 @@
     <div class="intro__boy" id="introBoy" aria-hidden="true">
       <svg viewBox="0 0 220 320" width="100%" height="100%" focusable="false" overflow="visible">
         <ellipse cx="108" cy="303" rx="74" ry="6" class="ib-shadow"/>
-        <g transform="rotate(12 100 300)">
+        <g id="ibLean" transform="rotate(12 100 300)">
           <g id="ibBob">
             <!-- backpack (behind the body) -->
             <rect x="48" y="112" width="34" height="62" rx="11" class="ib-line" fill="#34343c"/>
@@ -93,6 +93,7 @@
             <!-- head -->
             <ellipse cx="82" cy="83" rx="5" ry="7" class="ib-line" fill="#e7a173"/>
             <ellipse cx="104" cy="80" rx="23" ry="26" class="ib-line" fill="#f0b184"/>
+            <ellipse id="ibBlush" cx="113" cy="88" rx="9" ry="5.5" fill="#ff4d4d" opacity="0"/>
             <path d="M84 86 Q86 109 104 109 Q123 109 127 93 Q119 101 105 101 Q93 101 84 86 Z" fill="#2a1b15"/>
             <path d="M108 95 Q116 91 125 94" fill="none" stroke="#2a1b15" stroke-width="3" stroke-linecap="round"/>
             <ellipse cx="116" cy="99" rx="5.2" ry="3.2" fill="#3a1410"/><path d="M112 99.8 Q116 103 120 99.8" fill="#e35d5d"/>
@@ -108,6 +109,7 @@
             <!-- sweat -->
             <path class="ib-sweat ib-sweat--a" d="M72 64 q-4 7 0 10 q4 -3 0 -10z"/>
             <path class="ib-sweat ib-sweat--b" d="M68 84 q-3 6 0 8 q3 -2 0 -8z"/>
+            <path class="ib-sweat ib-sweat--c" d="M100 40 q-4 7 0 10 q4 -3 0 -10z"/>
             <!-- near leg -->
             <g transform="translate(106 176)">
               <g id="ibThighF">
@@ -123,6 +125,7 @@
               <path d="M112 116 L142 126 L171 130" class="ib-o"/>
               <path d="M112 116 L142 126 L171 130" class="ib-sleeve"/>
               <circle cx="173" cy="130" r="10.5" class="ib-line" fill="#f0b184"/>
+              <path class="ib-effort" d="M193 112 l9 -7 M198 126 l12 -1 M193 140 l9 7"/>
               <path class="ib-spark" d="M186 104 l2.6 -7 l2.6 7 l7 2.6 l-7 2.6 l-2.6 7 l-2.6 -7 l-7 -2.6z"/>
             </g>
           </g>
