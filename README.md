@@ -19,9 +19,17 @@ python3 -m http.server 8080
 portfolio/
 ├── index.html    # content + markup
 ├── styles.css    # dark theme, layout, animations
-├── script.js     # mobile menu, nav behavior, scroll reveal
+├── script.js     # theme, command palette, nav behavior, scroll reveal
+├── 404.html, robots.txt, sitemap.xml
 └── README.md
 ```
+
+## Features
+- **Light / dark theme.** Toggle in the nav; the choice is saved and the default is dark. The switch uses the View Transitions API where available.
+- **Command palette.** `Ctrl+K` (`⌘K` on Mac) or the search button. Jump to sections, open project repos and profiles, copy the email, switch theme, pause animations. Entries are read from the page, so there is nothing to keep in sync.
+- **Back-to-top button**, shown after the first screen.
+- **Print styles.** `Ctrl+P` gives a clean, light, single-column copy.
+- **Share cards.** Open Graph / Twitter tags and `assets/og-image.jpg` (1200×630), plus `Person` structured data, `robots.txt`, `sitemap.xml` and a `404.html`.
 
 ## Before you publish — fill these in
 

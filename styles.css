@@ -691,6 +691,19 @@ main { overflow-x: clip; }
 @media (max-width: 600px) { .cmdk__foot { display: none; } .cmdk__item small { display: none; } }
 @media (prefers-reduced-motion: reduce) { .cmdk[open] .cmdk__box { animation: none; } }
 
+/* ---------- Back to top ---------- */
+.to-top {
+  position: fixed; right: max(1rem, env(safe-area-inset-right)); bottom: max(1rem, env(safe-area-inset-bottom)); z-index: 40;
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  color: var(--slate-lightest); background: rgb(var(--bg-rgb) / 0.8);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  opacity: 0; visibility: hidden; transform: translateY(12px);
+  transition: opacity 0.3s ease, transform 0.3s var(--ease), visibility 0s linear 0.3s, color 0.2s ease, border-color 0.2s ease;
+}
+.to-top--show { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.to-top:hover { color: var(--accent); border-color: var(--border-strong); }
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .dot, .caret, .tl-dot--live::after, .scroll-cue span { animation: none; }
@@ -822,4 +835,28 @@ main { overflow-x: clip; }
 }
 @media (max-width: 768px) {
   .orb { width: 105vw; right: -38%; top: 26%; --orb-dim: 0.38; }
+}
+/* ---------- Print: a clean light copy, no animation chrome ---------- */
+@media print {
+  :root, :root[data-theme] {
+    --bg: #fff; --bg-light: #fff; --bg-rgb: 255 255 255;
+    --surface-rgb: 255 255 255; --surface-hover-rgb: 255 255 255; --ink-rgb: 40 12 16;
+    --border: rgb(40 12 16 / 0.18); --slate: #444; --slate-light: #333; --slate-lightest: #111; --white: #000;
+    --accent: #b3101f; --accent-2: #b3101f; --accent-rgb: 179 16 31; --accent-2-rgb: 179 16 31;
+    --accent-end: #b3101f; --on-accent: #fff; --inset-bg: transparent; --ok: #15803d;
+  }
+  html, body { background: #fff !important; }
+  .nav, .bg-grid, .bg-glow, .bg-boxes, .scroll-progress, .orb, .scroll-cue, .motion-toggle, .to-top, .cmdk, .skip-link,
+  .hscroll__bar, .hscroll__hint, .hero__actions, .contact__actions { display: none !important; }
+  .js [data-hero], .js [data-reveal], .js [data-stagger] > *, .js [data-stat], .js [data-flow] li { opacity: 1 !important; transform: none !important; }
+  .hscroll--pinned { height: auto !important; }
+  .hscroll--pinned .hscroll__sticky { position: static; height: auto; overflow: visible; padding: 0; }
+  .hscroll__track, .hscroll--pinned .hscroll__track { width: auto; flex-wrap: wrap; overflow: visible; transform: none !important; padding: 0 var(--gutter); }
+  .pcard { height: auto; min-height: 0; break-inside: avoid; box-shadow: none; }
+  .card, .stat, .timeline li, .skill-card { break-inside: avoid; box-shadow: none !important; }
+  .grad, .hero__title .grad { background: none !important; -webkit-text-fill-color: currentColor !important; color: var(--accent) !important; }
+  .section__head--projects { padding-top: 0; }
+  .hscroll__sticky { padding: 0 !important; }
+  a { text-decoration: none; }
+  .contact__socials a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.8em; color: #555; }
 }

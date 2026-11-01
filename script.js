@@ -111,6 +111,8 @@
     });
   });
 
+  var toTop = $('#toTop');
+  if (toTop) toTop.addEventListener('click', function () { scrollToId('home'); });
   var lastY = window.scrollY;
   var ticking = false;
   function onScroll() {
@@ -119,6 +121,11 @@
       nav.classList.toggle('nav--scrolled', y > 20);
       var hide = y > lastY && y > 240 && !links.classList.contains('open') && Date.now() > autoScrollUntil;
       nav.classList.toggle('nav--hidden', hide);
+    }
+    if (toTop) {
+      var show = y > window.innerHeight * 1.2;
+      toTop.classList.toggle('to-top--show', show);
+      toTop.tabIndex = show ? 0 : -1;
     }
     lastY = y;
     ticking = false;
@@ -227,6 +234,15 @@
       timer = setTimeout(tick, delay);
     }
     if (!loops.paused) timer = setTimeout(tick, 2600);
+    // Print the first phrase in full instead of whatever frame the typing is on
+    window.addEventListener('beforeprint', function () {
+      clearTimeout(timer);
+      typed.textContent = phrases[0];
+    });
+    window.addEventListener('afterprint', function () {
+      p = 0; c = phrases[0].length; deleting = true;
+      if (!loops.paused) timer = setTimeout(tick, 1200);
+    });
   }
 
   // ----------------------------------------------------------
