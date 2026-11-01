@@ -26,6 +26,7 @@
   // The switch grows out of the button via the View Transitions API
   // where the browser supports it; otherwise it changes instantly.
   // ----------------------------------------------------------
+  var introDone = (window.__intro && window.__intro.done) || Promise.resolve();
   var theme = initTheme();
   function initTheme() {
     var btn = $('#themeToggle');
@@ -233,7 +234,7 @@
       }
       timer = setTimeout(tick, delay);
     }
-    if (!loops.paused) timer = setTimeout(tick, 2600);
+    introDone.then(function () { if (!loops.paused) timer = setTimeout(tick, 2600); });
     // Print the first phrase in full instead of whatever frame the typing is on
     window.addEventListener('beforeprint', function () {
       clearTimeout(timer);
@@ -352,6 +353,9 @@
       add('Preferences', theme.current() === 'light' ? 'Switch to dark theme' : 'Switch to light theme', '', function () {
         theme.toggle();
       }, 'mode appearance colour color');
+      if ($('#intro')) add('Preferences', 'Replay intro animation', '', function () {
+        window.location.href = window.location.pathname + '?intro';
+      }, 'entry splash boy');
       var motionBtn = $('#motionToggle');
       if (motionBtn && !motionBtn.hidden) add('Preferences', loops.paused ? 'Play animations' : 'Pause animations', '', function () { motionBtn.click(); }, 'motion reduce');
       return items;
@@ -401,7 +405,7 @@
       setTimeout(it.run, 30);
     }
     function open() {
-      if (dlg.open) return;
+      if (dlg.open || root.classList.contains('intro-active')) return;
       setMenu(false);
       items = buildItems();
       input.value = '';
@@ -466,22 +470,24 @@
   // ----------------------------------------------------------
   // Hero entrance + orb
   // ----------------------------------------------------------
-  enter($$('[data-hero]'), 28, stagger(0.09, { startDelay: 0.1 }));
+  introDone.then(function () { enter($$('[data-hero]'), 28, stagger(0.09, { startDelay: 0.1 })); });
 
   var orbEl = $('#orb');
   if (orbEl) {
-    if (reduceMotion) {
-      animate(orbEl, { opacity: [0, 1] }, { duration: 0.3 });
-    } else {
-      animate(orbEl, { opacity: [0, 1], scale: [0.85, 1] }, {
-        scale: { type: 'spring', visualDuration: 1.2, bounce: 0, delay: 0.2 },
-        opacity: { duration: 1, ease: 'easeOut', delay: 0.2 }
-      });
-    }
+    introDone.then(function () {
+      if (reduceMotion) {
+        animate(orbEl, { opacity: [0, 1] }, { duration: 0.3 });
+      } else {
+        animate(orbEl, { opacity: [0, 1], scale: [0.85, 1] }, {
+          scale: { type: 'spring', visualDuration: 1.2, bounce: 0, delay: 0.2 },
+          opacity: { duration: 1, ease: 'easeOut', delay: 0.2 }
+        });
+      }
+    });
   }
 
   // Count-up stats
-  inView('#stats', function (el) {
+  inView('#stats', function (el) { introDone.then(function () {
     var items = $$('[data-stat]', el);
     enter(items, 18, stagger(0.08, { startDelay: 0.75 }));
     $$('[data-count]', el).forEach(function (b, i) {
@@ -495,7 +501,7 @@
         onUpdate: function (v) { b.textContent = pre + Math.round(v) + suf; }
       });
     });
-  }, { amount: 0.3 });
+  }); }, { amount: 0.3 });
 
   // ----------------------------------------------------------
   // Scroll-driven effects
