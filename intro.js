@@ -1,6 +1,7 @@
 /* ============================================================
-   Entry animation: a boy pushes the black screen off to the right,
-   uncovering the name, then the white panel lifts to reveal the page.
+   Entry animation: a boy walks in and pushes the black screen. It sticks around
+   the middle, he strains and heaves until it gives, then he shoves it off to the
+   right, uncovering the name. The white panel then lifts to reveal the page.
 
    - plays once per 24 hours per browser (add ?intro to the URL to replay it once)
    - skipped for reduced-motion visitors and for links with a #hash
@@ -23,16 +24,20 @@
   var bob = document.getElementById('ibBob');
   var armF = document.getElementById('ibArmF');
   var armB = document.getElementById('ibArmB');
+  var lean = document.getElementById('ibLean');
+  var blush = document.getElementById('ibBlush');
   var thighF = document.getElementById('ibThighF'), shinF = document.getElementById('ibShinF');
   var thighB = document.getElementById('ibThighB'), shinB = document.getElementById('ibShinB');
 
   // Timings (ms)
-  var T_PUSH = 3600;   // boy walks the black screen off
+  // The push has three beats: walk in, get stuck near the middle and strain, then break through
+  var T_WALK = 1400, T_STUCK = 1900, T_BREAK = 1500;
+  var T_PUSH = T_WALK + T_STUCK + T_BREAK;
+  var SCRABBLE = 16;   // how fast the feet pump on the spot while stuck (radians per second)
   var T_HOLD = 380;    // name on white, nothing moving
   var T_LIFT = 700;    // white panel slides up (matches the CSS transition)
   // Geometry in SVG units (viewBox 220 x 320)
-  var VB_W = 220, VB_H = 320, HAND_X = 206, STEP = 122;
-  var RAMP = 0.2;      // share of the push spent speeding up
+  var VB_W = 220, VB_H = 320, STEP = 122;
 
   var s = 1, W = 0, travel = 0;
   var guarded = [];
@@ -67,40 +72,86 @@
     boy.style.height = h + 'px';
     boy.style.top = Math.round(H * 0.5 - h * 0.5) + 'px';
     // far enough that the whole boy (backpack included) has left the screen
-    travel = W + (HAND_X - 30) * s;
+    travel = W + (handX(18) - 20) * s;
   }
 
-  // Slow start, then a steady push
-  function position(k) {
-    var v = travel / (1 - RAMP / 2);
-    return k < RAMP ? v * k * k / (2 * RAMP) : v * (k - RAMP / 2);
+  function easeOut(x) { return 1 - (1 - x) * (1 - x); }
+  function easeIn(x) { return x * x; }
+  function smooth(a, b, x) { var k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); }
+
+  // Where the edge of the black screen is (px from the left), t ms into the push
+  function position(t) {
+    var stuck = W * 0.46;                       // it jams about halfway across
+    if (t < T_WALK) return stuck * Math.sin((t / T_WALK) * Math.PI / 2);   // walks in, slowing as it resists
+    t -= T_WALK;
+    if (t < T_STUCK) {
+      var u = t / T_STUCK;
+      var amp = [16, 24, 36];                   // three heaves, each gaining a little more
+      var n = Math.min(2, Math.floor(u * 3)), v = u * 3 - n;
+      var heave = v < 0.6 ? easeOut(v / 0.6) : 1 - easeIn((v - 0.6) / 0.4);   // shove forward, then slip back
+      return stuck + W * 0.03 * u + amp[n] * s * heave;
+    }
+    t -= T_STUCK;
+    var w = Math.min(1, t / T_BREAK);
+    var from = stuck + W * 0.03;
+    var lunge = 0.1 * easeOut(Math.min(1, w / 0.15)) + 0.9 * Math.pow(w, 1.6);   // it gives, then he runs it off
+    return from + (travel - from) * lunge;
+  }
+
+  // How hard he is working, 0 (easy walk) to 1 (everything he has)
+  function strain(t) {
+    if (t < T_WALK) return 0.55 * smooth(0.55, 1, t / T_WALK);
+    t -= T_WALK;
+    if (t < T_STUCK) return 0.55 + 0.45 * (t / T_STUCK);
+    t -= T_STUCK;
+    return 1 - 0.7 * smooth(0, 0.25, t / T_BREAK);
+  }
+
+  // Where the hands end up (SVG units) for a given lean, so they stay on the screen's edge
+  function handX(deg) {
+    var a = deg * Math.PI / 180;
+    return 100 + 71.1 * Math.cos(a) + 170.5 * Math.sin(a) + 1;
   }
 
   function rot(el, deg) { el.setAttribute('transform', 'rotate(' + deg.toFixed(2) + ')'); }
 
-  // Walk cycle. phase advances with distance travelled, so feet don't skate.
-  function pose(phase) {
-    var sin = Math.sin(phase), cos = Math.cos(phase);
-    bob.setAttribute('transform', 'translate(0 ' + (-3.2 * Math.cos(2 * phase)).toFixed(2) + ')');
-    rot(thighF, -32 * sin);           rot(shinF, 42 * Math.max(0, cos));
-    rot(thighB, 32 * sin);            rot(shinB, 42 * Math.max(0, -cos));
-    // arms stay planted on the screen and give a small shove with each step
-    var shove = 1.8 * Math.sin(2 * phase);
+  // Walk cycle plus effort: harder lean, shorter steps, trembling arms, red face
+  function pose(ph, st, now) {
+    var sin = Math.sin(ph), cos = Math.cos(ph);
+    var swing = 32 - 10 * st, bend = 42 * (1 - 0.35 * st);
+    var tremble = st > 0.6 ? Math.sin(now / 38) * (st - 0.6) * 3.2 : 0;
+    bob.setAttribute('transform', 'translate(' + (tremble * 0.5).toFixed(2) + ' ' + (-3.2 * (1 - 0.6 * st) * Math.cos(2 * ph)).toFixed(2) + ')');
+    rot(thighF, -swing * sin);        rot(shinF, bend * Math.max(0, cos));
+    rot(thighB, swing * sin);         rot(shinB, bend * Math.max(0, -cos));
+    var shove = 1.8 * Math.sin(2 * ph) + tremble;
     armF.setAttribute('transform', 'translate(' + shove.toFixed(2) + ' 0)');
     armB.setAttribute('transform', 'translate(' + (shove * 0.8).toFixed(2) + ' 0)');
+    lean.setAttribute('transform', 'rotate(' + (12 + 13 * st).toFixed(2) + ' 100 300)');
+    blush.setAttribute('opacity', (st * 0.6).toFixed(2));
   }
 
+  var phase = 0, lastPos = 0, lastNow = 0;
   function frame(now) {
-    if (!started) started = now;
+    if (!started) { started = now; lastNow = now; }
     var t = now - started;
     if (t < T_PUSH) {
-      var pos = position(t / T_PUSH);
-      curtain.style.transform = 'translate3d(' + pos.toFixed(1) + 'px,0,0)';
-      boy.style.transform = 'translate3d(' + (pos - HAND_X * s).toFixed(1) + 'px,0,0)';
-      pose(pos / (STEP * s) * Math.PI);
+      var dt = Math.min(60, now - lastNow) / 1000;
+      lastNow = now;
+      var pos = position(t), st = strain(t);
+      // the screen's edge shudders while he strains against it
+      var edge = pos + (st > 0.6 ? Math.sin(now / 41) * 1.6 * (st - 0.6) / 0.4 : 0);
+      // steps follow the distance walked; while stuck, the feet scrabble on the spot
+      var scrabble = smooth(T_WALK * 0.7, T_WALK, t) * (1 - smooth(T_WALK + T_STUCK, T_WALK + T_STUCK + 300, t));
+      phase += Math.max(0, pos - lastPos) / (STEP * s) * Math.PI + SCRABBLE * dt * scrabble * (0.5 + 0.5 * st);
+      lastPos = pos;
+      curtain.style.transform = 'translate3d(' + edge.toFixed(1) + 'px,0,0)';
+      boy.style.transform = 'translate3d(' + (edge - handX(12 + 13 * st) * s).toFixed(1) + 'px,0,0)';
+      boy.classList.toggle('is-straining', st > 0.5);
+      pose(phase, st, now);
       raf = requestAnimationFrame(frame);
     } else {
       curtain.style.transform = 'translate3d(' + (travel + 4) + 'px,0,0)';
+      boy.classList.remove('is-straining');
       raf = 0;
       doneTimer = setTimeout(leave, T_HOLD);
     }
@@ -137,9 +188,9 @@
   }
 
   layout();
-  pose(0);
+  pose(0, 0, 0);
   curtain.style.transform = 'translate3d(0,0,0)';
-  boy.style.transform = 'translate3d(' + (-HAND_X * s) + 'px,0,0)';
+  boy.style.transform = 'translate3d(' + (-handX(12) * s) + 'px,0,0)';
   skipBtn.addEventListener('click', leave);
   document.addEventListener('keydown', onKey);
   window.addEventListener('resize', layout);

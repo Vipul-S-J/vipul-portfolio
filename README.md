@@ -26,7 +26,7 @@ portfolio/
 ```
 
 ## Features
-- **Entry animation.** A boy pushes the black screen off to reveal the name, then the page lifts away (`intro.js`, plain SVG + JS). Plays once per 24 hours per browser (refreshing never replays it); add `?intro` to the URL (or use "Replay intro animation" in the palette) to see it again. Skipped for reduced-motion visitors and `#hash` links; Esc or the Skip button ends it early.
+- **Entry animation.** A boy pushes the black screen, gets stuck halfway and strains until it gives, then shoves it off to reveal the name; the page then lifts away (`intro.js`, plain SVG + JS). Plays once per 24 hours per browser (refreshing never replays it); add `?intro` to the URL (or use "Replay intro animation" in the palette) to see it again. Skipped for reduced-motion visitors and `#hash` links; Esc or the Skip button ends it early.
 - **Light / dark theme.** Toggle in the nav; the choice is saved and the default is dark. The switch uses the View Transitions API where available.
 - **Command palette.** `Ctrl+K` (`⌘K` on Mac) or the search button. Jump to sections, open project repos and profiles, copy the email, switch theme, pause animations. Entries are read from the page, so there is nothing to keep in sync.
 - **Back-to-top button**, shown after the first screen.
