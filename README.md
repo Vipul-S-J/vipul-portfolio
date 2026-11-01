@@ -19,12 +19,14 @@ python3 -m http.server 8080
 portfolio/
 ├── index.html    # content + markup
 ├── styles.css    # dark theme, layout, animations
+├── intro.js      # entry animation driver (the boy is inline SVG in index.html)
 ├── script.js     # theme, command palette, nav behavior, scroll reveal
 ├── 404.html, robots.txt, sitemap.xml
 └── README.md
 ```
 
 ## Features
+- **Entry animation.** A boy pushes the black screen off to reveal the name, then the page lifts away (`intro.js`, plain SVG + JS). Plays once per session; add `?intro` to the URL (or use "Replay intro animation" in the palette) to see it again. Skipped for reduced-motion visitors and `#hash` links; Esc or the Skip button ends it early.
 - **Light / dark theme.** Toggle in the nav; the choice is saved and the default is dark. The switch uses the View Transitions API where available.
 - **Command palette.** `Ctrl+K` (`⌘K` on Mac) or the search button. Jump to sections, open project repos and profiles, copy the email, switch theme, pause animations. Entries are read from the page, so there is nothing to keep in sync.
 - **Back-to-top button**, shown after the first screen.
