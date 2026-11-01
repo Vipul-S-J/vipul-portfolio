@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vipul-s-j.github.io/vipul-portfolio/sitemap.xml
