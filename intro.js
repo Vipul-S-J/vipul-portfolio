@@ -3,8 +3,8 @@
    the middle, he strains and heaves until it gives, then he shoves it off to the
    right, uncovering the name. The white panel then lifts to reveal the page.
 
-   - plays once per 24 hours per browser (add ?intro to the URL to replay it once)
-   - skipped for reduced-motion visitors and for links with a #hash
+   - plays on every page load, including a refresh
+   - skipped only for visitors who ask for reduced motion
    - any key (Esc / Enter / Space) or the Skip button ends it early
    - window.__intro.done resolves when the hero may start animating
    ============================================================ */
@@ -50,10 +50,7 @@
     });
   });
 
-  // Mark it as seen right away, so a refresh (even mid-intro) never plays it again
-  try { localStorage.setItem('introSeenAt', String(Date.now())); } catch (e) {}
-  try { sessionStorage.setItem('introSeen', '1'); } catch (e) {}
-  // A replay link (?intro) must not replay on refresh either: drop the parameter from the address bar
+  // Keep the address bar clean: drop a leftover ?intro
   try {
     var q = new URLSearchParams(window.location.search);
     if (q.has('intro')) {
