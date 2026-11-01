@@ -1,14 +1,15 @@
 /* ============================================================
    Wavy boxes background
 
-   A grid of tall boxes seen from above. Moving the pointer (or
-   tapping) sends a slow ripple across the grid that lifts the
-   boxes and tints them toward the accent colour. When the pointer
-   is idle, a ripple starts on its own every few seconds.
+   A fine grid of small boxes seen from above. A slow ripple rolls
+   continuously from the top of the screen to the bottom, lifting
+   the boxes it passes and tinting them toward the accent colour.
+   Moving the pointer (or tapping) adds extra ripples on top.
 
    Based on the "wavy cubes" Three.js demo, with these changes:
-   - visible gaps so every box reads as its own box
-   - slower wave speed, longer fade, slower camera drift
+   - small boxes with visible gaps, so the grid reads as a fine net
+   - a constant top-to-bottom ripple instead of pointer-only ripples
+   - slow wave speed, long fade, slow camera drift
    - site palette (dark maroon boxes, red accent)
    - no shadows or post-processing, to keep it light as a page background
 
@@ -24,10 +25,13 @@ import {
   FloatType,
   InstancedBufferAttribute,
   InstancedMesh,
+  MathUtils,
   MeshStandardMaterial,
   NearestFilter,
   Object3D,
   PerspectiveCamera,
+  PlaneGeometry,
+  Mesh,
   Plane,
   Raycaster,
   RGBAFormat,
@@ -39,38 +43,44 @@ import {
 } from 'three';
 
 const CONFIG = {
-  gridSize: 40,          // boxes per side
-  boxWidth: 0.8,
-  boxHeight: 3,
-  gap: 0.14,             // space between boxes; the reference uses 0.01 so they merge into one surface
+  gridSize: 90,          // boxes per side
+  boxWidth: 0.34,
+  boxHeight: 1.6,
+  gap: 0.08,             // space between boxes
 
-  // Wave. The reference runs at speed 6 and fade 2.
-  waveSpeed: 2.6,        // world units per second the ripple front travels
+  // Ambient ripple that rolls from the top of the screen to the bottom.
+  ambientSpeed: 1.4,     // world units per second (one crest every ~6 units, so ~4.5s apart)
+  ambientFrequency: 1.05,
+  ambientAmplitude: 0.5, // how far the crest lifts a box
+  ambientSharpness: 2,   // higher = narrower crests with flatter gaps between them
+  ambientSourceZ: -28,   // ripple source above the screen; closer = more curved fronts
+
+  // Pointer ripples (added on top of the ambient one)
+  waveSpeed: 2,
   waveFrequency: 1.2,
-  waveWidth: 3,
-  waveJitter: 0.2,
-  waveAmplitude: 0.5,
-  waveMaxHeight: 0.5,
-  fadeTime: 3.4,         // seconds for a ripple to fade to ~37%
-  trailSpacing: 0.35,    // min pointer travel (world units) between ripple sources
-  idleDelay: 3,          // seconds without pointer input before ripples start on their own
-  idleInterval: 2.6,     // seconds between idle ripples (reference: 1.5)
+  waveWidth: 2.2,
+  waveJitter: 0.08,
+  waveAmplitude: 0.35,
+  waveMaxHeight: 0.6,
+  fadeTime: 3.4,         // seconds for a pointer ripple to fade to ~37%
+  trailSpacing: 0.3,     // min pointer travel (world units) between ripple sources
 
   // Look
   background: '#0d0506',
   colorBase: '#34161a',
+  colorFloor: '#4a1d23',
   colorHigh: '#ff3b4e',
   exposure: 1.25,
 
   // Camera
-  fov: 40,
-  distance: 17,
-  driftLerp: 0.025,      // reference: 0.04
+  fov: 24,
+  distance: 29,
+  driftLerp: 0.025,
   driftAlpha: Math.PI * 0.02,
   driftBeta: Math.PI * 0.035
 };
 
-const MAX_TRAIL = 128;
+const MAX_TRAIL = 96;
 const TOPS_Y = CONFIG.boxHeight / 2;
 
 export function startWavyBoxes(canvas, options) {
@@ -102,7 +112,7 @@ export function startWavyBoxes(canvas, options) {
   fill.position.set(10, 5, -3);
   scene.add(fill);
 
-  // ---- Ripple sources (pointer path + idle points), uploaded to the GPU as a 128x1 float texture ----
+  // ---- Pointer ripple sources, uploaded to the GPU as a 96x1 float texture ----
   const trail = [];
   const trailData = new Float32Array(MAX_TRAIL * 4);
   const trailTexture = new DataTexture(trailData, MAX_TRAIL, 1, RGBAFormat, FloatType);
@@ -119,6 +129,12 @@ export function startWavyBoxes(canvas, options) {
     uWaveWidth: { value: CONFIG.waveWidth },
     uAmplitude: { value: CONFIG.waveAmplitude },
     uJitter: { value: CONFIG.waveJitter },
+    uTime: { value: 0 },
+    uAmbSpeed: { value: CONFIG.ambientSpeed },
+    uAmbFreq: { value: CONFIG.ambientFrequency },
+    uAmbAmp: { value: CONFIG.ambientAmplitude },
+    uAmbSharp: { value: CONFIG.ambientSharpness },
+    uAmbSourceZ: { value: CONFIG.ambientSourceZ },
     uMaxHeight: { value: CONFIG.waveMaxHeight },
     uColorBase: { value: new Color(CONFIG.colorBase) },
     uColorHigh: { value: new Color(CONFIG.colorHigh) }
@@ -147,6 +163,12 @@ export function startWavyBoxes(canvas, options) {
         uniform float uAmplitude;
         uniform float uJitter;
         uniform float uMaxHeight;
+        uniform float uTime;
+        uniform float uAmbSpeed;
+        uniform float uAmbFreq;
+        uniform float uAmbAmp;
+        uniform float uAmbSharp;
+        uniform float uAmbSourceZ;
 
         // Stable per-box offset in [-0.5, 0.5], so ripples look slightly uneven.
         vec2 hash2(vec2 p) {
@@ -174,7 +196,15 @@ export function startWavyBoxes(canvas, options) {
           }
           // Overlapping ripples average instead of stacking, which avoids chaotic peaks.
           waveHeight /= max(totalWeight, 1.0);
-          float displacement = clamp(waveHeight * uAmplitude, -uMaxHeight, uMaxHeight);
+
+          // Ambient ripple: circular fronts from a point far above the screen, so
+          // they travel top to bottom with a slight curve. Camera "up" is -Z.
+          float srcDist = length(worldXZ - vec2(0.0, uAmbSourceZ));
+          float phase = uAmbFreq * (srcDist - uAmbSpeed * uTime);
+          float unevenness = 0.8 + 0.2 * sin(worldXZ.x * 0.25 + uTime * 0.15);
+          float ambient = pow(0.5 + 0.5 * cos(phase), uAmbSharp) * uAmbAmp * unevenness;
+
+          float displacement = clamp(ambient + waveHeight * uAmplitude, -uMaxHeight, uMaxHeight);
           transformed.y += displacement;
           vHeight = displacement;
         }`);
@@ -189,6 +219,16 @@ export function startWavyBoxes(canvas, options) {
         float lift = clamp(vHeight / uMaxHeight, 0.0, 1.0);
         diffuseColor.rgb = mix(uColorBase, uColorHigh, lift);`);
   };
+
+  // Dim floor under the boxes. Without it the gaps near the centre of the screen (where the
+  // camera looks straight down and no box sides show) are pure background and read as a dark cross.
+  const floor = new Mesh(
+    new PlaneGeometry(CONFIG.gridSize * 0.6, CONFIG.gridSize * 0.6),
+    new MeshStandardMaterial({ color: CONFIG.colorFloor, roughness: 1, metalness: 0 })
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -CONFIG.boxHeight / 2 - 0.01;
+  scene.add(floor);
 
   const mesh = new InstancedMesh(geometry, material, count);
   mesh.frustumCulled = false; // vertices move in the shader, so the CPU bounds would be wrong
@@ -216,11 +256,6 @@ export function startWavyBoxes(canvas, options) {
   function addSource(x, z, strength) {
     if (trail.length >= MAX_TRAIL) trail.shift();
     trail.push({ x, z, age: 0, strength });
-  }
-
-  function addIdleSource() {
-    const span = bounds * 0.3; // stay near the middle, where the camera is looking
-    addSource((Math.random() - 0.5) * span, (Math.random() - 0.5) * span, 0.8 + Math.random() * 0.2);
   }
 
   function updateTrail(dt) {
@@ -252,9 +287,6 @@ export function startWavyBoxes(canvas, options) {
   const mouse = new Vector2(0, 0);       // -1..1, drives camera drift
   const drift = new Vector2(0, 0);
   let lastPoint = null;
-  let idleFor = 0;
-  let idleTimer = 0;
-  let idling = true;
 
   function pointerToPlane(e) {
     ndc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
@@ -273,18 +305,12 @@ export function startWavyBoxes(canvas, options) {
     // Faster movement makes a stronger ripple, capped at 1.
     addSource(hit.x, hit.z, lastPoint ? Math.min(1, 0.4 + moved * 0.5) : 0.4);
     lastPoint = { x: hit.x, z: hit.z };
-    idleFor = 0;
-    idling = false;
-    idleTimer = 0;
   }
 
   function onPointerDown(e) {
     if (!pointerToPlane(e)) return;
     addSource(hit.x, hit.z, 1);
     lastPoint = { x: hit.x, z: hit.z };
-    idleFor = 0;
-    idling = false;
-    idleTimer = 0;
   }
 
   // ---- Camera ----
@@ -304,7 +330,7 @@ export function startWavyBoxes(canvas, options) {
     const h = window.innerHeight;
     const aspect = w / h;
     // Pull the camera back on tall screens so boxes don't get huge on phones.
-    distance = Math.min(32, CONFIG.distance / Math.min(1, aspect * 1.2));
+    distance = Math.min(52, CONFIG.distance / Math.min(1, aspect * 1.2));
     camera.aspect = aspect;
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
@@ -323,22 +349,11 @@ export function startWavyBoxes(canvas, options) {
   }
 
   function tick(now) {
-    const dt = Math.min(0.05, (now - last) / 1000 || 0);
+    // rAF timestamps can land slightly before `last`; never let time run backwards.
+    const dt = MathUtils.clamp((now - last) / 1000 || 0, 0, 0.05);
     last = now;
 
-    idleFor += dt;
-    if (!idling && idleFor >= CONFIG.idleDelay) {
-      idling = true;
-      idleTimer = CONFIG.idleInterval; // first idle ripple right away
-    }
-    if (idling) {
-      idleTimer += dt;
-      if (idleTimer >= CONFIG.idleInterval) {
-        addIdleSource();
-        idleTimer = 0;
-      }
-    }
-
+    uniforms.uTime.value += dt;
     updateTrail(dt);
 
     drift.x += (mouse.x - drift.x) * CONFIG.driftLerp;
@@ -364,11 +379,9 @@ export function startWavyBoxes(canvas, options) {
     }
   }
 
-  // A ripple already in progress, so the first frame (and the still frame for
+  // Start mid-ripple, so the first frame (and the still frame for
   // reduced-motion visitors) isn't a flat grid.
-  addSource(-1.5, 0.5, 1);
-  trail[0].age = 1.6;
-  updateTrail(0);
+  uniforms.uTime.value = 6;
 
   resize();
   renderFrame();
@@ -394,6 +407,8 @@ export function startWavyBoxes(canvas, options) {
       window.removeEventListener('pointerdown', onPointerDown);
       document.removeEventListener('visibilitychange', sync);
       geometry.dispose();
+      floor.geometry.dispose();
+      floor.material.dispose();
       material.dispose();
       trailTexture.dispose();
       renderer.dispose();
