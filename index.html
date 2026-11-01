@@ -33,7 +33,10 @@
       try {
         var forced = /[?&]intro(=|&|$)/.test(location.search);
         var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        var seen = sessionStorage.getItem('introSeen') === '1';
+        // Remembered for 24 hours (all tabs), so refreshing or reopening the site never replays it
+        var seen = false, at = Number(localStorage.getItem('introSeenAt'));
+        if (at && Date.now() - at < 24 * 60 * 60 * 1000) seen = true;
+        if (!seen && sessionStorage.getItem('introSeen') === '1') seen = true;
         var deepLink = location.hash.length > 1;
         pending = !calm && (forced || (!seen && !deepLink));
       } catch (e) {}
