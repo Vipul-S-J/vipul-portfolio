@@ -91,6 +91,24 @@ strong { color: var(--accent); font-weight: 500; }
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
           mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
 }
+/* Wavy boxes (WebGL, see src/wavy-boxes.js). Falls back to .bg-grid when WebGL is unavailable. */
+.bg-boxes {
+  position: fixed; inset: 0; z-index: -4;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0; transition: opacity 1.2s ease;
+}
+.bg-boxes.is-ready { opacity: 1; }
+.bg-scrim { display: none; }
+.has-boxes .bg-grid { display: none; }
+/* Darkens the boxes so body text keeps its contrast; heavier on the left where the hero copy sits. */
+.has-boxes .bg-scrim {
+  display: block;
+  position: fixed; inset: 0; z-index: -3; pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 50%, transparent 35%, rgba(13, 5, 6, 0.75) 100%),
+    linear-gradient(90deg, rgba(13, 5, 6, 0.82) 0%, rgba(13, 5, 6, 0.5) 55%, rgba(13, 5, 6, 0.3) 100%);
+}
 .bg-glow {
   position: fixed; z-index: -1; pointer-events: none;
   top: -25%; right: -15%;

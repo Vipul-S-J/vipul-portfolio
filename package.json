@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "build:bg": "esbuild src/wavy-boxes.js --bundle --minify --format=esm --target=es2020 --legal-comments=none --outfile=vendor/wavy-boxes.js"
+  },
   "dependencies": {
     "motion": "14.7.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "three": "^0.187.0"
   }
 }

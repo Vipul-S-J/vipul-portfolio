@@ -20,8 +20,13 @@ portfolio/
 ├── index.html    # content + markup
 ├── styles.css    # dark theme, layout, animations
 ├── script.js     # mobile menu, nav behavior, scroll reveal
+├── src/wavy-boxes.js     # source of the wavy boxes background (Three.js)
+├── vendor/wavy-boxes.js  # built bundle that index.html loads (committed)
 └── README.md
 ```
+
+## Wavy boxes background
+The site itself needs no build. Only if you edit `src/wavy-boxes.js`, run `npm install` once, then `npm run build:bg` to regenerate `vendor/wavy-boxes.js`. Wave speed, box gap, colours and camera are in the `CONFIG` object at the top of that file.
 
 ## Before you publish — fill these in
 
