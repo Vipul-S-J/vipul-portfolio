@@ -764,7 +764,7 @@
       [205, 108, 22], [168, 78, 16], [126, 54, 12], [84, 34, 10]
     ];
     // "VSJ" dots run left to right from pale gold to amber
-    var TEXT_PALETTE = [[255, 238, 170], [255, 222, 118], [252, 198, 72], [246, 172, 46], [236, 148, 32], [222, 124, 24]];
+    var TEXT_PALETTE = [[255, 238, 160], [255, 226, 120], [255, 212, 88], [255, 196, 66], [252, 178, 50], [244, 158, 38]];
     var TEXT_COLORS = TEXT_PALETTE.map(function (c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; });
     var COLORS = PALETTE.map(function (c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; });
 
@@ -807,7 +807,7 @@
     // and only sways a little while the shell turns around it (kind 4 in draw).
     function buildText() {
       pts = pts.filter(function (q) { return q.kind !== 4; });
-      var TW = 420, TH = 170, WORLD_W = 1.62, k = WORLD_W / TW;
+      var TW = 420, TH = 170, WORLD_W = 1.24, k = WORLD_W / TW;
       var tc = document.createElement('canvas');
       tc.width = TW; tc.height = TH;
       var tx = tc.getContext('2d', { willReadFrequently: true });
@@ -819,7 +819,7 @@
         if (tx.measureText('VSJ').width <= TW - 30) break;
       }
       tx.fillText('VSJ', TW / 2, TH / 2 + size * 0.04);
-      var data = tx.getImageData(0, 0, TW, TH).data, step = 3;
+      var data = tx.getImageData(0, 0, TW, TH).data, step = 2;
       for (var py = 0; py < TH; py += step) {
         for (var pxl = 0; pxl < TW; pxl += step) {
           if (data[(py * TW + pxl) * 4 + 3] < 140) continue;
@@ -830,7 +830,7 @@
             z: (Math.random() - 0.5) * 0.05,
             r: 1, kind: 4, s: Math.random(), tw: Math.random() * Math.PI * 2,
             ci: Math.max(0, Math.min(5, Math.floor(((frac - 0.15) / 0.7) * 6 + (Math.random() - 0.5)))),
-            sz: 1.1 + Math.random() * 0.8
+            sz: 0.75 + Math.random() * 0.55
           });
         }
       }
@@ -882,9 +882,13 @@
           var t1 = p.x * cyT - p.z * syT, tz1 = p.x * syT + p.z * cyT;
           var t2y = p.y * cxT - tz1 * sxT, tz2 = p.y * sxT + tz1 * cxT;
           var tsc = F / (F + tz2) * R * breathe;
-          ctx.globalAlpha = (0.9 + (opts.animate ? 0.1 * Math.sin(time * 0.0021 + p.tw) : 0.05)) * (0.85 + p.s * 0.15);
+          ctx.globalAlpha = (0.8 + (opts.animate ? 0.08 * Math.sin(time * 0.0021 + p.tw) : 0)) * (0.88 + p.s * 0.12);
           ctx.fillStyle = TEXT_COLORS[p.ci];
           ctx.fillRect(ox + t1 * tsc, oy + t2y * tsc, p.sz * textScale, p.sz * textScale);
+          if (p.s > 0.7) { // a soft glow around every few dots
+            ctx.globalAlpha = 0.13;
+            ctx.fillRect(ox + t1 * tsc - 1.4, oy + t2y * tsc - 1.4, p.sz * textScale + 2.8, p.sz * textScale + 2.8);
+          }
           continue;
         }
         var px = p.x, py = p.y, pz = p.z;
