@@ -22,6 +22,46 @@
   }
 
   // ----------------------------------------------------------
+  // Theme: dark (default) or light, remembered in localStorage.
+  // The switch grows out of the button via the View Transitions API
+  // where the browser supports it; otherwise it changes instantly.
+  // ----------------------------------------------------------
+  var theme = initTheme();
+  function initTheme() {
+    var btn = $('#themeToggle');
+    var meta = $('meta[name="theme-color"]');
+    var BAR = { dark: '#0d0506', light: '#faf6f5' };
+    function current() { return root.dataset.theme === 'light' ? 'light' : 'dark'; }
+    function paint(name) {
+      root.dataset.theme = name;
+      if (meta) meta.setAttribute('content', BAR[name]);
+      if (btn) btn.setAttribute('aria-label', name === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+    }
+    function set(name, origin) {
+      try { localStorage.setItem('theme', name); } catch (e) {}
+      if (!document.startViewTransition || reduceMotion) { paint(name); return; }
+      var x = origin ? origin.x : window.innerWidth / 2;
+      var y = origin ? origin.y : window.innerHeight / 2;
+      var radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+      var vt = document.startViewTransition(function () { paint(name); });
+      vt.ready.then(function () {
+        root.animate(
+          { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + radius + 'px at ' + x + 'px ' + y + 'px)'] },
+          { duration: 650, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', pseudoElement: '::view-transition-new(root)' }
+        );
+      }, function () {});
+    }
+    function toggle(origin) { set(current() === 'light' ? 'dark' : 'light', origin); }
+    paint(current());
+    if (btn) {
+      btn.addEventListener('click', function () {
+        var r = btn.getBoundingClientRect();
+        toggle({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      });
+    }
+    return { toggle: toggle, current: current };
+  }
+  // ----------------------------------------------------------
   // Navigation: menu, smooth scroll, hide on scroll, active link
   // ----------------------------------------------------------
   var nav = $('#nav');
