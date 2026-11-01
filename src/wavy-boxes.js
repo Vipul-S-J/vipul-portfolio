@@ -10,7 +10,7 @@
    - small boxes with visible gaps, so the grid reads as a fine net
    - a constant top-to-bottom ripple instead of pointer-only ripples
    - slow wave speed, long fade, slow camera drift
-   - site palette (dark maroon boxes, red accent)
+   - site palette (dark charcoal boxes, yellow accent)
    - no shadows or post-processing, to keep it light as a page background
 
    Source lives in src/. Build with: npm run build:bg
@@ -52,7 +52,7 @@ const CONFIG = {
   ambientSpeed: 1.4,     // world units per second (one crest every ~6 units, so ~4.5s apart)
   ambientFrequency: 1.05,
   ambientAmplitude: 0.5, // how far the crest lifts a box
-  ambientSharpness: 2,   // higher = narrower crests with flatter gaps between them
+  ambientSharpness: 4,   // higher = narrower crests with flatter gaps between them
   ambientSourceZ: -28,   // ripple source above the screen; closer = more curved fronts
 
   // Pointer ripples (added on top of the ambient one)
@@ -66,11 +66,11 @@ const CONFIG = {
   trailSpacing: 0.3,     // min pointer travel (world units) between ripple sources
 
   // Look
-  background: '#0d0506',
-  colorBase: '#34161a',
-  colorFloor: '#4a1d23',
-  colorHigh: '#ff3b4e',
-  exposure: 1.25,
+  background: '#080808',
+  colorBase: '#151411',
+  colorFloor: '#1e1d18',
+  colorHigh: '#ffd60a',
+  exposure: 1.4,
 
   // Camera
   fov: 24,
@@ -108,7 +108,7 @@ export function startWavyBoxes(canvas, options) {
   const key = new DirectionalLight('#ffffff', 3.2);
   key.position.set(-20, 10, 6);
   scene.add(key);
-  const fill = new DirectionalLight('#ffd9dc', 1);
+  const fill = new DirectionalLight('#fff1c2', 1);
   fill.position.set(10, 5, -3);
   scene.add(fill);
 
