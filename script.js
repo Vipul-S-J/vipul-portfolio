@@ -276,6 +276,145 @@
   }
 
   // ----------------------------------------------------------
+  // Command palette (Ctrl/Cmd + K). Every entry is read from the page
+  // itself (nav links, project cards, contact links), so it never drifts
+  // out of sync with the content.
+  // ----------------------------------------------------------
+  function initPalette() {
+    var openBtn = $('#cmdkOpen');
+    if (!openBtn || typeof HTMLDialogElement === 'undefined') return;
+    var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+    var hint = $('#cmdkHint');
+    if (hint) hint.textContent = isMac ? '\u2318K' : 'Ctrl K';
+
+    var dlg = document.createElement('dialog');
+    dlg.className = 'cmdk';
+    dlg.setAttribute('aria-label', 'Command palette');
+    dlg.innerHTML =
+      '<div class="cmdk__box">' +
+        '<div class="cmdk__search">' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>' +
+          '<input type="text" role="combobox" aria-expanded="true" aria-controls="cmdkList" aria-autocomplete="list" aria-label="Search commands" placeholder="Type a command or search\u2026" autocomplete="off" spellcheck="false" />' +
+          '<kbd>Esc</kbd>' +
+        '</div>' +
+        '<ul class="cmdk__list" id="cmdkList" role="listbox" aria-label="Commands"></ul>' +
+        '<p class="cmdk__empty" hidden>No matches</p>' +
+        '<div class="cmdk__foot"><span><kbd>\u2191</kbd><kbd>\u2193</kbd> navigate</span><span><kbd>\u21b5</kbd> select</span><span><kbd>Esc</kbd> close</span></div>' +
+      '</div>';
+    document.body.appendChild(dlg);
+    var input = $('input', dlg), list = $('.cmdk__list', dlg), empty = $('.cmdk__empty', dlg);
+
+    function text(el) { return el ? el.textContent.replace(/\s+/g, ' ').trim() : ''; }
+    function go(href) { window.open(href, '_blank', 'noopener'); }
+
+    // Rebuilt on every open, so labels like "Switch to light theme" are current
+    function buildItems() {
+      var items = [];
+      function add(group, label, hintText, run, keys) {
+        items.push({ group: group, label: label, hint: hintText || '', run: run, keys: (keys || '').toLowerCase() });
+      }
+      add('Go to', 'Home', '', function () { scrollToId('home'); }, 'top hero');
+      navAnchors.forEach(function (a) {
+        var id = a.getAttribute('href').slice(1);
+        add('Go to', text(a), '#' + id, function () { scrollToId(id); });
+      });
+      $$('.pcard').forEach(function (card) {
+        var title = text($('.pcard__title', card));
+        var repo = $('a.gh-btn', card);
+        if (title && repo) add('Projects', title, 'GitHub \u2197', function () { go(repo.href); }, 'project repo source code');
+      });
+      var mail = $('.contact__actions a[href^="mailto:"]');
+      var copyBtn = $('#copyEmail');
+      if (copyBtn) add('Contact', 'Copy email address', copyBtn.dataset.email, function () {
+        var done = function () { var s = $('#copyStatus'); if (s) s.textContent = 'Email address copied to clipboard'; };
+        if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(copyBtn.dataset.email).then(done, function () {});
+      }, 'mail');
+      if (mail) add('Contact', 'Send an email', '', function () { window.location.href = mail.href; }, 'mail write hire');
+      $$('.contact__socials a').forEach(function (a) {
+        if (/linkedin|github/i.test(a.href)) add('Contact', 'Open ' + text(a), '\u2197', function () { go(a.href); }, 'profile social');
+      });
+      add('Preferences', theme.current() === 'light' ? 'Switch to dark theme' : 'Switch to light theme', '', function () {
+        theme.toggle();
+      }, 'mode appearance colour color');
+      var motionBtn = $('#motionToggle');
+      if (motionBtn && !motionBtn.hidden) add('Preferences', loops.paused ? 'Play animations' : 'Pause animations', '', function () { motionBtn.click(); }, 'motion reduce');
+      return items;
+    }
+
+    var items = [], shown = [], active = 0;
+    function render() {
+      var q = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      shown = items.filter(function (it) {
+        var hay = (it.label + ' ' + it.group + ' ' + it.keys).toLowerCase();
+        return q.every(function (t) { return hay.indexOf(t) !== -1; });
+      });
+      list.textContent = '';
+      var lastGroup = '';
+      shown.forEach(function (it, i) {
+        if (it.group !== lastGroup) {
+          lastGroup = it.group;
+          var g = document.createElement('li');
+          g.className = 'cmdk__group'; g.setAttribute('role', 'presentation'); g.textContent = it.group;
+          list.appendChild(g);
+        }
+        var li = document.createElement('li');
+        li.className = 'cmdk__item'; li.id = 'cmdk-opt-' + i; li.setAttribute('role', 'option');
+        li.innerHTML = '<span></span><small></small>';
+        li.firstChild.textContent = it.label;
+        li.lastChild.textContent = it.hint;
+        li.addEventListener('click', function () { choose(i); });
+        li.addEventListener('mousemove', function () { if (active !== i) setActive(i, false); });
+        list.appendChild(li);
+      });
+      empty.hidden = shown.length > 0;
+      list.hidden = shown.length === 0;
+      setActive(0, false);
+    }
+    function setActive(i, scroll) {
+      active = i;
+      $$('.cmdk__item', list).forEach(function (el, n) { el.setAttribute('aria-selected', String(n === i)); });
+      var el = $('#cmdk-opt-' + i, list);
+      if (el) { input.setAttribute('aria-activedescendant', el.id); if (scroll) el.scrollIntoView({ block: 'nearest' }); }
+      else input.removeAttribute('aria-activedescendant');
+    }
+    function choose(i) {
+      var it = shown[i];
+      if (!it) return;
+      dlg.close();
+      // run after the dialog has closed so focus and scrolling behave normally
+      setTimeout(it.run, 30);
+    }
+    function open() {
+      if (dlg.open) return;
+      setMenu(false);
+      items = buildItems();
+      input.value = '';
+      render();
+      dlg.showModal();
+      input.focus();
+    }
+
+    input.addEventListener('input', render);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (shown.length) setActive((active + 1) % shown.length, true); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (shown.length) setActive((active - 1 + shown.length) % shown.length, true); }
+      else if (e.key === 'Home') { e.preventDefault(); setActive(0, true); }
+      else if (e.key === 'End') { e.preventDefault(); setActive(Math.max(0, shown.length - 1), true); }
+      else if (e.key === 'Enter') { e.preventDefault(); choose(active); }
+    });
+    // Click on the dimmed area closes it; keep the page behind from scrolling
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener('wheel', function (e) { if (!list.contains(e.target)) e.preventDefault(); }, { passive: false });
+    openBtn.addEventListener('click', open);
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (dlg.open) dlg.close(); else open();
+      }
+    });
+  }
+
+  // ----------------------------------------------------------
   // Without Motion: show the page as-is and keep the essentials
   // ----------------------------------------------------------
   if (!M) {
@@ -285,6 +424,7 @@
     initMotionToggle();
     startTyping();
     initCopy();
+    initPalette();
     return;
   }
   clearTimeout(window.__revealFallback);
@@ -476,6 +616,7 @@
   initMotionToggle();
   startTyping();
   initCopy();
+  initPalette();
 
   // ----------------------------------------------------------
   // Hero orb: a rotating particle sphere (paused off-screen,

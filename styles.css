@@ -639,6 +639,58 @@ main { overflow-x: clip; }
 ::view-transition-old(root) { z-index: 1; }
 ::view-transition-new(root) { z-index: 2; }
 
+/* ---------- Command palette (Ctrl/Cmd + K) ---------- */
+.cmdk-btn { display: none; }
+.js .cmdk-btn {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  height: 40px; padding: 0 0.7rem; border-radius: 10px;
+  border: 1px solid var(--border); color: var(--slate-light);
+  font-family: var(--font-mono); font-size: 0.8rem;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.cmdk-btn:hover { color: var(--accent); border-color: var(--border-strong); background: var(--accent-tint); }
+.cmdk-btn kbd, .cmdk kbd {
+  font-family: var(--font-mono); font-size: 0.7rem; line-height: 1;
+  padding: 0.22rem 0.4rem; border-radius: 6px;
+  color: var(--slate); background: rgb(var(--ink-rgb) / 0.06); border: 1px solid var(--border);
+}
+@media (max-width: 1100px) { .cmdk-btn__text, .cmdk-btn kbd { display: none; } .js .cmdk-btn { width: 40px; justify-content: center; padding: 0; } }
+.cmdk {
+  position: fixed; inset: 0; margin: 0; padding: 0;
+  width: 100%; max-width: none; height: 100%; max-height: none;
+  border: 0; background: transparent; color: var(--slate-light);
+  overflow: hidden;
+}
+.cmdk::backdrop { background: rgb(var(--bg-rgb) / 0.62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.cmdk__box {
+  width: min(600px, calc(100vw - 2rem)); margin: min(18vh, 9rem) auto 0;
+  border-radius: 16px; overflow: hidden;
+  background: var(--bg-light); border: 1px solid var(--border-strong);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgb(var(--ink-rgb) / 0.04);
+}
+.cmdk[open] .cmdk__box { animation: cmdk-in 0.22s var(--ease); }
+@keyframes cmdk-in { from { opacity: 0; transform: translateY(-10px) scale(0.98); } to { opacity: 1; transform: none; } }
+.cmdk__search { display: flex; align-items: center; gap: 0.75rem; padding: 0.35rem 1rem; border-bottom: 1px solid var(--border); color: var(--slate); }
+.cmdk__search input {
+  flex: 1; min-width: 0; height: 52px; background: transparent; border: 0; outline: none;
+  font: inherit; font-size: 1rem; color: var(--slate-lightest);
+}
+.cmdk__search input::placeholder { color: var(--slate); }
+.cmdk__list { max-height: min(52vh, 380px); overflow-y: auto; padding: 0.4rem; overscroll-behavior: contain; scrollbar-width: thin; }
+.cmdk__group { padding: 0.65rem 0.7rem 0.3rem; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); }
+.cmdk__item {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.65rem 0.7rem; border-radius: 10px; cursor: pointer;
+  color: var(--slate-light); font-size: 0.95rem;
+}
+.cmdk__item small { font-family: var(--font-mono); font-size: 0.72rem; color: var(--slate); white-space: nowrap; }
+.cmdk__item[aria-selected="true"] { background: var(--accent-tint); color: var(--slate-lightest); box-shadow: inset 2px 0 0 var(--accent); }
+.cmdk__empty { padding: 2rem 1rem; text-align: center; font-size: 0.9rem; color: var(--slate); }
+.cmdk__foot { display: flex; gap: 1.25rem; padding: 0.65rem 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--slate); }
+.cmdk__foot span { display: inline-flex; align-items: center; gap: 0.35rem; }
+@media (max-width: 600px) { .cmdk__foot { display: none; } .cmdk__item small { display: none; } }
+@media (prefers-reduced-motion: reduce) { .cmdk[open] .cmdk__box { animation: none; } }
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .dot, .caret, .tl-dot--live::after, .scroll-cue span { animation: none; }
