@@ -31,7 +31,7 @@
 
   // Timings (ms)
   // The push has three beats: walk in, get stuck near the middle and strain, then break through
-  var T_WALK = 1400, T_STUCK = 2500, T_BREAK = 1500;
+  var T_WALK = 1400, T_STUCK = 2000, T_BREAK = 1500;
   var T_PUSH = T_WALK + T_STUCK + T_BREAK;
   var SCRABBLE = 22;   // how fast the feet pump on the spot while stuck (radians per second)
   var T_HOLD = 380;    // name on white, nothing moving
