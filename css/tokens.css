@@ -1,0 +1,121 @@
+/* ============================================================
+   Cloud Ops theme tokens
+   Names follow the Design System contract (--background, --primary, --muted, --ring, --chart-N, ...).
+   Dark is the default; [data-theme="light"] overrides it. See themes/cloud-ops.md.
+   The legacy aliases at the bottom of each block keep older selectors working during the migration.
+   ============================================================ */
+
+@font-face {
+  font-family: 'Geist';
+  src: url('../assets/fonts/geist-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 900; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('../assets/fonts/geist-mono-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 900; font-style: normal; font-display: swap;
+}
+
+/* .pcard and .about__avatar are dark tiles in both themes, so they carry the dark values too */
+:root, .pcard, .about__avatar {
+  color-scheme: dark;
+
+  /* --- contract tokens --- */
+  --background: #0d0506;
+  --foreground: #fff0f1;
+  --card: #160a0c;
+  --card-foreground: #fff0f1;
+  --popover: #1c0d10;
+  --popover-foreground: #fff0f1;
+  --primary: #ff3b4e;
+  --primary-foreground: #1a0306;
+  --secondary: #1c0d10;
+  --secondary-foreground: #f2d9dc;
+  --muted: #160809;
+  --muted-foreground: #b08a8f;
+  --accent: #f8bd58;
+  --accent-foreground: #1a0f00;
+  --destructive: #ef4444;
+  --destructive-foreground: #fff0f1;
+  --border: rgb(255 255 255 / 0.07);
+  --input: rgb(255 255 255 / 0.12);
+  --ring: #ff3b4e;
+  --radius: 1rem;
+  /* service-category palette (AWS architecture category hues), used for cards and diagrams */
+  --chart-1: #ED7100;  /* compute */
+  --chart-2: #7AA116;  /* storage */
+  --chart-3: #C925D1;  /* database / dev tools */
+  --chart-4: #8C4FFF;  /* networking */
+  --chart-5: #DD344C;  /* security / analytics */
+
+  /* --- site extensions (not part of the contract) --- */
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --text-1: #f2d9dc;                 /* strongest body text */
+  --text-2: #cfa9ad;                 /* secondary body text */
+  --primary-2: #ff8a5c;              /* gradient partner of --primary */
+  --primary-end: #ff5a4e;
+  --bg-rgb: 13 5 6;                  /* channel triplets, for rgb(var(--x) / alpha) */
+  --surface-rgb: 30 11 14;
+  --surface-hover-rgb: 40 14 18;
+  --ink-rgb: 255 255 255;            /* overlays and hairlines: white on dark, ink on light */
+  --primary-rgb: 255 59 78;
+  --primary-2-rgb: 255 138 92;
+  --primary-tint: rgb(var(--primary-rgb) / 0.12);
+  --border-strong: rgb(var(--primary-rgb) / 0.45);
+  --inset-bg: rgba(0, 0, 0, 0.25);
+
+  /* type, motion */
+  --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --dur-1: 120ms; --dur-2: 200ms; --dur-3: 360ms; --dur-4: 640ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* --- legacy aliases (temporary) --- */
+  --bg: var(--background);
+  --bg-light: var(--muted);
+  --surface: rgb(var(--surface-rgb) / 0.72);
+  --surface-hover: rgb(var(--surface-hover-rgb) / 0.85);
+  --slate: var(--muted-foreground);
+  --slate-light: var(--text-2);
+  --slate-lightest: var(--text-1);
+  --white: var(--foreground);
+  --ok: var(--success);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: #faf6f5;
+  --foreground: #1a0a0d;
+  --card: #ffffff;
+  --card-foreground: #1a0a0d;
+  --popover: #ffffff;
+  --popover-foreground: #1a0a0d;
+  --primary: #d9182e;
+  --primary-foreground: #ffffff;
+  --secondary: #f2eae9;
+  --secondary-foreground: #2a1418;
+  --muted: #f2eae9;
+  --muted-foreground: #6a5156;
+  --accent: #8a5a00;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: rgb(40 12 16 / 0.12);
+  --input: rgb(40 12 16 / 0.16);
+  --ring: #d9182e;
+
+  --success: #15803d;
+  --warning: #b45309;
+  --text-1: #2a1418;
+  --text-2: #503a3f;
+  --primary-2: #e0602f;
+  --primary-end: #e03a2f;
+  --bg-rgb: 250 246 245;
+  --surface-rgb: 255 255 255;
+  --surface-hover-rgb: 255 255 255;
+  --ink-rgb: 40 12 16;
+  --primary-rgb: 217 24 46;
+  --primary-2-rgb: 224 96 47;
+  --inset-bg: rgba(40, 12, 16, 0.05);
+}
