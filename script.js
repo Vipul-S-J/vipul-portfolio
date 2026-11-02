@@ -786,17 +786,27 @@
             r: 1, kind: 4, s: Math.random(), tw: Math.random() * Math.PI * 2,
             ci: Math.max(0, Math.min(5, Math.floor(((frac - 0.15) / 0.7) * 6 + (Math.random() - 0.5)))),
             sz: 0.75 + Math.random() * 0.55,
-            // where this dot drifts to while the lettering is dissolved
-            ax: (Math.random() - 0.5) * 2.4, ay: (Math.random() - 0.5) * 2.0, az: (Math.random() - 0.5) * 1.6
+            // the spot on the sphere this dot lives at while the lettering is dissolved
+            ax: 0, ay: 0, az: 0
           });
         }
       }
     }
     buildText();
+    pts.forEach(function (q) {
+      if (q.kind !== 4) return;
+      var u = Math.random() * 2 - 1, t = Math.random() * Math.PI * 2, rs = Math.sqrt(1 - u * u), rr = 0.97 + Math.random() * 0.06;
+      q.ax = Math.cos(t) * rs * rr; q.ay = u * rr; q.az = Math.sin(t) * rs * rr;
+    });
     // The page font may arrive after the first build: rebuild once it is ready
     if (document.fonts && document.fonts.load) {
       document.fonts.load('700 120px "IBM Plex Sans"').then(function () {
         buildText();
+        pts.forEach(function (q) {
+          if (q.kind !== 4) return;
+          var u = Math.random() * 2 - 1, t = Math.random() * Math.PI * 2, rs = Math.sqrt(1 - u * u), rr = 0.97 + Math.random() * 0.06;
+          q.ax = Math.cos(t) * rs * rr; q.ay = u * rr; q.az = Math.sin(t) * rs * rr;
+        });
         if (!running) draw(performance.now());
       }, function () {});
     }
@@ -836,7 +846,7 @@
       // VSJ cycle: hold, dissolve into drifting dots, then pull back together (m: 0 = formed, 1 = scattered)
       var m = 0;
       if (opts.animate) {
-        var HOLD = 5200, OUT = 1600, GONE = 500, IN = 1900, ph = time % (HOLD + OUT + GONE + IN);
+        var HOLD = 4500, OUT = 2000, GONE = 900, IN = 2400, ph = time % (HOLD + OUT + GONE + IN);
         var ease = function (v) { return v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2; };
         if (ph < HOLD) m = 0;
         else if (ph < HOLD + OUT) m = ease((ph - HOLD) / OUT);
@@ -847,17 +857,26 @@
       for (var k = 0; k < pts.length; k++) {
         var p = pts[k];
         if (p.kind === 4) {
-          var mp = m > 0 ? Math.max(0, Math.min(1, m * 1.45 - p.s * 0.45)) : 0;
-          var qx = p.x + p.ax * mp, qy = p.y + p.ay * mp, qz = p.z + p.az * mp;
-          var t1 = qx * cyT - qz * syT, tz1 = qx * syT + qz * cyT;
-          var t2y = qy * cxT - tz1 * sxT, tz2 = qy * sxT + tz1 * cxT;
+          var mp = m > 0 ? Math.max(0, Math.min(1, m * 1.5 - p.s * 0.5)) : 0;
+          var t1 = p.x * cyT - p.z * syT, tz1 = p.x * syT + p.z * cyT;
+          var t2y = p.y * cxT - tz1 * sxT, tz2 = p.y * sxT + tz1 * cxT;
           var tsc = F / (F + tz2) * R * breathe;
-          ctx.globalAlpha = (0.8 + (opts.animate ? 0.08 * Math.sin(time * 0.0021 + p.tw) : 0)) * (0.88 + p.s * 0.12) * (1 - mp * 0.45);
+          var dx = ox + t1 * tsc, dy = oy + t2y * tsc;
+          if (mp > 0) {
+            // same projection the sphere uses, so the dot sits on the turning orb, then flies into the letter
+            var sx1 = p.ax * cy - p.az * sy, sz1 = p.ax * sy + p.az * cy;
+            var sy2 = p.ay * cx - sz1 * sx, sz2 = p.ay * sx + sz1 * cx;
+            var sx3 = sx1 * cz - sy2 * sz, sy3 = sx1 * sz + sy2 * cz;
+            var ssc = F / (F + sz2) * R * breathe;
+            var spx = ox + sx3 * ssc, spy = oy + sy3 * ssc;
+            dx += (spx - dx) * mp; dy += (spy - dy) * mp;
+          }
+          ctx.globalAlpha = (0.8 + (opts.animate ? 0.08 * Math.sin(time * 0.0021 + p.tw) : 0)) * (0.88 + p.s * 0.12) * (1 - mp * 0.55);
           ctx.fillStyle = TEXT_COLORS[p.ci];
-          ctx.fillRect(ox + t1 * tsc, oy + t2y * tsc, p.sz * textScale, p.sz * textScale);
+          ctx.fillRect(dx, dy, p.sz * textScale, p.sz * textScale);
           if (p.s > 0.7 && mp < 0.5) { // a soft glow around every few dots
             ctx.globalAlpha = 0.13;
-            ctx.fillRect(ox + t1 * tsc - 1.4, oy + t2y * tsc - 1.4, p.sz * textScale + 2.8, p.sz * textScale + 2.8);
+            ctx.fillRect(dx - 1.4, dy - 1.4, p.sz * textScale + 2.8, p.sz * textScale + 2.8);
           }
           continue;
         }
