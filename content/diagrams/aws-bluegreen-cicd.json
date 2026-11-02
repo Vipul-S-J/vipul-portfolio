@@ -1,0 +1,266 @@
+{
+ "title": "Blue/green deployment path",
+ "alt": "Architecture diagram: a git push triggers GitLab CI, the GitLab Runner on EC2 builds and uploads an artifact to S3, CodeDeploy creates a green Auto Scaling Group and the ALB shifts traffic to it.",
+ "nodes": [
+  {
+   "id": "push",
+   "label": "git push",
+   "sub": "developer",
+   "icon": "user",
+   "kind": "neutral",
+   "d": [
+    0,
+    0
+   ],
+   "m": [
+    0,
+    0
+   ],
+   "source": "aws-bluegreen-cicd README: Architecture Overview / CI/CD Pipeline"
+  },
+  {
+   "id": "gitlab",
+   "label": "GitLab",
+   "sub": "repo + CI pipeline",
+   "icon": "git",
+   "kind": "devtools",
+   "d": [
+    1,
+    0
+   ],
+   "m": [
+    1,
+    0
+   ],
+   "source": "aws-bluegreen-cicd README: Architecture Overview / CI/CD Pipeline"
+  },
+  {
+   "id": "runner",
+   "label": "GitLab Runner",
+   "sub": "self-hosted on EC2",
+   "icon": "ec2",
+   "kind": "compute",
+   "d": [
+    2,
+    0
+   ],
+   "m": [
+    0,
+    1
+   ],
+   "source": "aws-bluegreen-cicd README: Architecture Overview / CI/CD Pipeline"
+  },
+  {
+   "id": "s3",
+   "label": "Amazon S3",
+   "sub": "artifact .zip",
+   "icon": "bucket",
+   "kind": "storage",
+   "d": [
+    3,
+    0
+   ],
+   "m": [
+    1,
+    1
+   ],
+   "source": "aws-bluegreen-cicd README: Architecture Overview / CI/CD Pipeline"
+  },
+  {
+   "id": "codedeploy",
+   "label": "CodeDeploy",
+   "sub": "blue/green",
+   "icon": "codedeploy",
+   "kind": "devtools",
+   "d": [
+    4,
+    0
+   ],
+   "m": [
+    0,
+    2
+   ],
+   "source": "aws-bluegreen-cicd README: Architecture Overview / CI/CD Pipeline"
+  },
+  {
+   "id": "alb",
+   "label": "Load balancer",
+   "sub": "Application LB",
+   "icon": "balance",
+   "kind": "network",
+   "d": [
+    3,
+    1
+   ],
+   "m": [
+    1,
+    2
+   ],
+   "source": "aws-bluegreen-cicd README: Architecture Overview / CI/CD Pipeline"
+  },
+  {
+   "id": "green",
+   "label": "Green fleet",
+   "sub": "new version",
+   "icon": "ec2",
+   "kind": "compute",
+   "d": [
+    4,
+    2
+   ],
+   "m": [
+    0,
+    3
+   ],
+   "source": "aws-bluegreen-cicd README: Architecture Overview / CI/CD Pipeline"
+  },
+  {
+   "id": "blue",
+   "label": "Blue fleet",
+   "sub": "old version",
+   "icon": "ec2",
+   "kind": "compute",
+   "d": [
+    5,
+    2
+   ],
+   "m": [
+    1,
+    3
+   ],
+   "source": "aws-bluegreen-cicd README: Architecture Overview / CI/CD Pipeline"
+  }
+ ],
+ "groups": [
+  {
+   "id": "asg",
+   "label": "Auto Scaling Group \u00b7 3 AZs",
+   "kind": "compute",
+   "members": [
+    "green",
+    "blue"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "id": "e1",
+   "from": "push",
+   "to": "gitlab"
+  },
+  {
+   "id": "e2",
+   "from": "gitlab",
+   "to": "runner"
+  },
+  {
+   "id": "e3",
+   "from": "runner",
+   "to": "s3"
+  },
+  {
+   "id": "e4",
+   "from": "s3",
+   "to": "codedeploy"
+  },
+  {
+   "id": "e5",
+   "from": "codedeploy",
+   "to": "green"
+  },
+  {
+   "id": "e6",
+   "from": "alb",
+   "to": "green",
+   "sides": {
+    "d": [
+     "b",
+     "l"
+    ],
+    "m": [
+     "l",
+     "r"
+    ]
+   }
+  }
+ ],
+ "steps": [
+  {
+   "n": 1,
+   "text": "A git push to GitLab triggers the pipeline.",
+   "nodes": [
+    "push",
+    "gitlab"
+   ],
+   "edges": [
+    "e1"
+   ],
+   "retire": []
+  },
+  {
+   "n": 2,
+   "text": "The self-hosted GitLab Runner on EC2 builds and packages the app.",
+   "nodes": [
+    "runner"
+   ],
+   "edges": [
+    "e2"
+   ],
+   "retire": []
+  },
+  {
+   "n": 3,
+   "text": "The artifact is uploaded to an S3 bucket.",
+   "nodes": [
+    "s3"
+   ],
+   "edges": [
+    "e3"
+   ],
+   "retire": []
+  },
+  {
+   "n": 4,
+   "text": "CodeDeploy pulls the artifact from S3 and starts a blue/green deployment.",
+   "nodes": [
+    "codedeploy"
+   ],
+   "edges": [
+    "e4"
+   ],
+   "retire": []
+  },
+  {
+   "n": 5,
+   "text": "A green fleet is provisioned by copying the Auto Scaling Group.",
+   "nodes": [
+    "green",
+    "blue"
+   ],
+   "edges": [
+    "e5"
+   ],
+   "retire": []
+  },
+  {
+   "n": 6,
+   "text": "The Application Load Balancer shifts traffic from blue to green.",
+   "nodes": [
+    "alb"
+   ],
+   "edges": [
+    "e6"
+   ],
+   "retire": []
+  },
+  {
+   "n": 7,
+   "text": "After a successful deployment the blue fleet is terminated (0-minute wait).",
+   "nodes": [],
+   "edges": [],
+   "retire": [
+    "blue"
+   ]
+  }
+ ]
+}

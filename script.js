@@ -6,7 +6,7 @@
   'use strict';
 
   var root = document.documentElement;
-  var M = window.Motion;
+  var G = window.gsap;
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
@@ -69,17 +69,25 @@
   var toggle = $('#navToggle');
   var links = $('#navLinks');
   var indicator = $('#navIndicator');
-  var navAnchors = links ? $$('a[href^="#"]', links) : [];
+  var navAnchors = links ? $$('a[href]', links) : [];
   var activeLink = null;
   var autoScrollUntil = 0;
 
-  function setMenu(open) {
+  var menuBackdrop = ['main', 'footer'].map(function (s) { return $(s); }).filter(Boolean);
+  function setMenu(open, returnFocus) {
     if (!links || !toggle) return;
+    var was = links.classList.contains('open');
     links.classList.toggle('open', open);
     toggle.classList.toggle('open', open);
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    // While the sheet is open the page behind it is out of reach (a focus trap that keeps the header controls)
+    menuBackdrop.forEach(function (el) { if (open) el.setAttribute('inert', ''); else if (!root.classList.contains('intro-active')) el.removeAttribute('inert'); });
+    if (was && !open && returnFocus) toggle.focus();
   }
+  document.addEventListener('pointerdown', function (e) {
+    if (links && links.classList.contains('open') && !e.target.closest('.nav')) setMenu(false);
+  });
 
   if (toggle) {
     toggle.addEventListener('click', function () {
@@ -87,7 +95,7 @@
     });
   }
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') setMenu(false);
+    if (e.key === 'Escape') setMenu(false, true);
   });
 
   function scrollToId(id) {
@@ -137,18 +145,10 @@
   onScroll();
 
   // Sliding indicator under the nav links (springs keep velocity when interrupted)
-  var INDICATOR = { type: 'spring', visualDuration: 0.35, bounce: 0.12 };
   function moveIndicator(link) {
-    if (!indicator || !M || window.innerWidth <= 768) return;
-    if (!link) {
-      M.animate(indicator, { opacity: 0 }, { duration: 0.2 });
-      return;
-    }
-    M.animate(indicator, {
-      x: link.offsetLeft,
-      scaleX: link.offsetWidth / 100,
-      opacity: 1
-    }, INDICATOR);
+    if (!indicator || !G || window.innerWidth <= 768) return;
+    if (!link) { G.to(indicator, { opacity: 0, duration: 0.2, overwrite: 'auto' }); return; }
+    G.to(indicator, { x: link.offsetLeft, scaleX: link.offsetWidth / 100, opacity: 1, duration: 0.45, ease: 'power3.out', overwrite: 'auto' });
   }
 
   function setActive(link) {
@@ -249,6 +249,41 @@
   // ----------------------------------------------------------
   // Copy email
   // ----------------------------------------------------------
+  function initSkillMap() {
+    var chips = $$('.chip');
+    var cards = $$('.pcard');
+    var hint = $('#skillHint');
+    if (!chips.length || !hint) return;
+    var base = hint.textContent;
+    var pinned = null;
+    function titleOf(slug) {
+      var c = cards.filter(function (x) { return x.dataset.slug === slug; })[0];
+      return c ? text($('.pcard__title', c)) : slug;
+    }
+    function show(chip) {
+      var uses = chip ? (chip.dataset.uses || '').split(' ').filter(Boolean) : [];
+      cards.forEach(function (c) { c.classList.toggle('is-related', uses.indexOf(c.dataset.slug) !== -1); });
+      root.classList.toggle('skill-active', !!chip);
+      chips.forEach(function (c) { c.classList.toggle('is-on', c === chip); });
+      if (!chip) { hint.textContent = base; return; }
+      hint.textContent = uses.length
+        ? chip.textContent + ': used in ' + uses.length + (uses.length === 1 ? ' project' : ' projects') + ' (' + uses.map(titleOf).join(', ') + ')'
+        : chip.textContent + ': listed as a skill; no project card uses it yet.';
+    }
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        pinned = pinned === chip ? null : chip;
+        chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c === pinned)); });
+        show(pinned);
+      });
+      if (finePointer) {
+        chip.addEventListener('pointerenter', function () { show(chip); });
+        chip.addEventListener('pointerleave', function () { show(pinned); });
+      }
+      chip.addEventListener('focus', function () { show(chip); });
+      chip.addEventListener('blur', function () { show(pinned); });
+    });
+  }
   function initCopy() {
     var btn = $('#copyEmail');
     var label = $('#copyLabel');
@@ -257,11 +292,11 @@
     var timer;
 
     function swapLabel(text) {
-      if (!M || reduceMotion) { label.textContent = text; return; }
-      M.animate(label, { opacity: 0, y: -6 }, { duration: 0.12 }).then(function () {
+      if (!G || reduceMotion) { label.textContent = text; return; }
+      G.to(label, { opacity: 0, y: -6, duration: 0.12, overwrite: true, onComplete: function () {
         label.textContent = text;
-        M.animate(label, { opacity: [0, 1], y: [6, 0] }, { type: 'spring', visualDuration: 0.25, bounce: 0 });
-      });
+        G.fromTo(label, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' });
+      } });
     }
 
     function fallbackCopy(text) {
@@ -330,15 +365,19 @@
       function add(group, label, hintText, run, keys) {
         items.push({ group: group, label: label, hint: hintText || '', run: run, keys: (keys || '').toLowerCase() });
       }
-      add('Go to', 'Home', '', function () { scrollToId('home'); }, 'top hero');
+      add('Go to', 'Home', '', function () {
+        if ($('#home')) scrollToId('home'); else window.location.href = (document.querySelector('.nav__logo') || {}).href || './';
+      }, 'top hero');
       navAnchors.forEach(function (a) {
-        var id = a.getAttribute('href').slice(1);
-        add('Go to', text(a), '#' + id, function () { scrollToId(id); });
+        var href = a.getAttribute('href');
+        if (href.charAt(0) === '#') add('Go to', text(a), href, function () { scrollToId(href.slice(1)); });
+        else add('Go to', text(a), '', function () { window.location.href = a.href; });
       });
       $$('.pcard').forEach(function (card) {
         var title = text($('.pcard__title', card));
-        var repo = $('a.gh-btn', card);
-        if (title && repo) add('Projects', title, 'GitHub \u2197', function () { go(repo.href); }, 'project repo source code');
+        var study = $('a.pcard__link', card), repo = $('a.gh-btn', card);
+        if (title && study) add('Projects', title, 'Case study', function () { window.location.href = study.href; }, 'project architecture case study');
+        else if (title && repo) add('Projects', title, 'GitHub \u2197', function () { go(repo.href); }, 'project repo source code');
       });
       var mail = $('.contact__actions a[href^="mailto:"]');
       var copyBtn = $('#copyEmail');
@@ -437,51 +476,50 @@
   // ----------------------------------------------------------
   // Without Motion: show the page as-is and keep the essentials
   // ----------------------------------------------------------
-  if (!M) {
+  if (!G) {
     showEverything();
-    initProjectGallery();
     startOrbIfPresent();
     initMotionToggle();
     startTyping();
     initCopy();
     initPalette();
+    initSkillMap();
     return;
   }
   clearTimeout(window.__revealFallback);
 
-  var animate = M.animate, inView = M.inView, scroll = M.scroll, stagger = M.stagger;
-
-  // Motion presets: no overshoot on entrances, a little life on interactions
-  var ENTER = { type: 'spring', visualDuration: 0.7, bounce: 0 };
-  var FADE = { duration: 0.5, ease: 'easeOut' };
-  var SNAP = { type: 'spring', visualDuration: 0.3, bounce: 0.15 };
-  var TILT = { type: 'spring', stiffness: 320, damping: 28 };
-
-  function enter(targets, distance, delay) {
-    if (reduceMotion) {
-      return animate(targets, { opacity: [0, 1] }, { duration: 0.25, delay: delay });
-    }
-    return animate(targets, { opacity: [0, 1], y: [distance, 0] }, {
-      y: Object.assign({ delay: delay }, ENTER),
-      opacity: Object.assign({ delay: delay }, FADE)
-    });
+  var ST = window.ScrollTrigger;
+  if (ST) G.registerPlugin(ST);
+  // Entrances ease out with no overshoot; interactions get a little life
+  var EASE = 'power3.out';
+  function enter(targets, distance, opts) {
+    opts = opts || {};
+    var vars = { delay: opts.delay || 0, stagger: opts.stagger || 0, overwrite: 'auto' };
+    if (reduceMotion) return G.fromTo(targets, { opacity: 0 }, Object.assign(vars, { opacity: 1, duration: 0.25 }));
+    return G.fromTo(targets, { opacity: 0, y: distance }, Object.assign(vars, { opacity: 1, y: 0, duration: 0.7, ease: EASE }));
   }
-
+  // Calls cb(el) the first time an element scrolls into view
+  function inView(sel, cb, opts) {
+    opts = opts || {};
+    var els = typeof sel === 'string' ? $$(sel) : [sel];
+    if (!('IntersectionObserver' in window)) { els.forEach(cb); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); cb(e.target); } });
+    }, { threshold: opts.amount || 0, rootMargin: opts.margin || '0px' });
+    els.forEach(function (el) { io.observe(el); });
+  }
   // ----------------------------------------------------------
   // Hero entrance + orb
   // ----------------------------------------------------------
-  introDone.then(function () { enter($$('[data-hero]'), 28, stagger(0.09, { startDelay: 0.1 })); });
+  introDone.then(function () { enter($$('[data-hero]'), 28, { stagger: 0.09, delay: 0.1 }); });
 
   var orbEl = $('#orb');
   if (orbEl) {
     introDone.then(function () {
       if (reduceMotion) {
-        animate(orbEl, { opacity: [0, 1] }, { duration: 0.3 });
+        G.fromTo(orbEl, { opacity: 0 }, { opacity: 1, duration: 0.3 });
       } else {
-        animate(orbEl, { opacity: [0, 1], scale: [0.85, 1] }, {
-          scale: { type: 'spring', visualDuration: 1.2, bounce: 0, delay: 0.2 },
-          opacity: { duration: 1, ease: 'easeOut', delay: 0.2 }
-        });
+        G.fromTo(orbEl, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 1.2, delay: 0.2, ease: EASE });
       }
     });
   }
@@ -489,16 +527,15 @@
   // Count-up stats
   inView('#stats', function (el) { introDone.then(function () {
     var items = $$('[data-stat]', el);
-    enter(items, 18, stagger(0.08, { startDelay: 0.75 }));
+    enter(items, 18, { stagger: 0.08, delay: 0.75 });
     $$('[data-count]', el).forEach(function (b, i) {
       var end = Number(b.dataset.count);
       var pre = b.dataset.prefix || '', suf = b.dataset.suffix || '';
       if (reduceMotion) { b.textContent = pre + end + suf; return; }
-      animate(0, end, {
-        duration: 1.6,
-        delay: 0.85 + i * 0.08,
-        ease: [0.22, 1, 0.36, 1],
-        onUpdate: function (v) { b.textContent = pre + Math.round(v) + suf; }
+      var counter = { v: 0 };
+      G.to(counter, {
+        v: end, duration: 1.6, delay: 0.85 + i * 0.08, ease: 'power4.out',
+        onUpdate: function () { b.textContent = pre + Math.round(counter.v) + suf; }
       });
     });
   }); }, { amount: 0.3 });
@@ -507,46 +544,36 @@
   // Scroll-driven effects
   // ----------------------------------------------------------
   var progressBar = $('#scrollProgress');
-  if (progressBar) scroll(animate(progressBar, { scaleX: [0, 1] }, { ease: 'linear' }));
-
+  if (progressBar && ST) {
+    G.fromTo(progressBar, { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: true } });
+  }
   var timeline = $('#timeline');
   var timelineLine = $('#timelineLine');
-  if (timeline && timelineLine) {
-    scroll(animate(timelineLine, { scaleY: [0, 1] }, { ease: 'linear' }), {
-      target: timeline,
-      offset: ['start 75%', 'end 55%']
-    });
+  if (timeline && timelineLine && ST) {
+    G.fromTo(timelineLine, { scaleY: 0 }, { scaleY: 1, ease: 'none',
+      scrollTrigger: { trigger: timeline, start: 'top 75%', end: 'bottom 55%', scrub: true } });
   }
-
   var hero = $('#home');
   var heroGrid = $('#heroGrid');
-  if (hero && heroGrid && !reduceMotion) {
-    scroll(animate(heroGrid, { y: [0, -70], opacity: [1, 0.25] }, { ease: 'linear' }), {
-      target: hero,
-      offset: ['start start', 'end start']
-    });
-    if (orbEl) {
-      scroll(animate(orbEl, { y: [0, 120], scale: [1, 0.9] }, { ease: 'linear' }), {
-        target: hero,
-        offset: ['start start', 'end start']
-      });
-    }
+  if (hero && heroGrid && ST && !reduceMotion) {
+    var heroScroll = { trigger: hero, start: 'top top', end: 'bottom top', scrub: true };
+    G.to(heroGrid, { y: -70, opacity: 0.25, ease: 'none', scrollTrigger: heroScroll });
+    if (orbEl) G.to(orbEl, { y: 120, scale: 0.9, ease: 'none', scrollTrigger: heroScroll });
   }
-
-  initProjectGallery();
-
+  // Layout settles after fonts load; keep scroll positions accurate
+  if (ST && document.fonts && document.fonts.ready) document.fonts.ready.then(function () { ST.refresh(); });
   // ----------------------------------------------------------
   // Reveal on scroll
   // ----------------------------------------------------------
   function revealOne(el) {
     if (el.dataset.shown) return;
     el.dataset.shown = '1';
-    enter(el, 32, 0);
+    enter(el, 32);
   }
   function revealGroup(el) {
     if (el.dataset.shown) return;
     el.dataset.shown = '1';
-    enter(Array.prototype.slice.call(el.children), 24, stagger(0.07));
+    enter(Array.prototype.slice.call(el.children), 24, { stagger: 0.07 });
   }
   inView('[data-reveal]', revealOne, { margin: '0px 0px -12% 0px' });
   inView('[data-stagger]', revealGroup, { margin: '0px 0px -10% 0px' });
@@ -574,9 +601,9 @@
   inView('[data-flow]', function (el) {
     var nodes = $$('li', el);
     if (reduceMotion) {
-      animate(nodes, { opacity: [0, 1] }, { duration: 0.25 });
+      G.fromTo(nodes, { opacity: 0 }, { opacity: 1, duration: 0.25 });
     } else {
-      animate(nodes, { opacity: [0, 1], x: [-8, 0] }, { duration: 0.4, ease: 'easeOut', delay: stagger(0.15, { startDelay: 0.25 }) });
+      G.fromTo(nodes, { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.4, ease: 'power2.out', delay: 0.25, stagger: 0.15 });
     }
     el.classList.add('is-in');
   }, { amount: 0.6 });
@@ -586,59 +613,54 @@
   // ----------------------------------------------------------
   if (finePointer && !reduceMotion) {
     $$('[data-tilt]').forEach(function (card) {
-      var target = { rotateX: 0, rotateY: 0 };
-      animate(card, { transformPerspective: 1000 }, { duration: 0 });
-
+      G.set(card, { transformPerspective: 1000 });
+      var rx = G.quickTo(card, 'rotationX', { duration: 0.5, ease: EASE });
+      var ry = G.quickTo(card, 'rotationY', { duration: 0.5, ease: EASE });
       card.addEventListener('pointermove', function (e) {
         var r = card.getBoundingClientRect();
         var px = (e.clientX - r.left) / r.width;
         var py = (e.clientY - r.top) / r.height;
         card.style.setProperty('--mx', (px * 100) + '%');
         card.style.setProperty('--my', (py * 100) + '%');
-        target.rotateX = (0.5 - py) * 6;
-        target.rotateY = (px - 0.5) * 6;
-        animate(card, target, TILT);
+        rx((0.5 - py) * 6);
+        ry((px - 0.5) * 6);
       });
-
-      M.hover(card, function () {
-        animate(card, { y: -6 }, SNAP);
-        return function () {
-          animate(card, { rotateX: 0, rotateY: 0, y: 0 }, SNAP);
-        };
-      });
+      card.addEventListener('pointerenter', function () { G.to(card, { y: -6, duration: 0.3, ease: EASE, overwrite: 'auto' }); });
+      card.addEventListener('pointerleave', function () { rx(0); ry(0); G.to(card, { y: 0, duration: 0.4, ease: EASE, overwrite: 'auto' }); });
     });
-
     // Background glow drifts gently toward the cursor
     var glow = $('#bgGlow');
     if (glow) {
-      var glowTarget = { x: 0, y: 0 };
-      var GLOW = { type: 'spring', stiffness: 40, damping: 20 };
-      var glowQueued = false;
+      var gx = G.quickTo(glow, 'x', { duration: 1.6, ease: EASE });
+      var gy = G.quickTo(glow, 'y', { duration: 1.6, ease: EASE });
       window.addEventListener('pointermove', function (e) {
-        glowTarget.x = (e.clientX / window.innerWidth - 0.5) * 140;
-        glowTarget.y = (e.clientY / window.innerHeight - 0.5) * 140;
-        if (glowQueued) return;
-        glowQueued = true;
-        window.requestAnimationFrame(function () {
-          glowQueued = false;
-          animate(glow, glowTarget, GLOW);
-        });
+        gx((e.clientX / window.innerWidth - 0.5) * 140);
+        gy((e.clientY / window.innerHeight - 0.5) * 140);
       }, { passive: true });
     }
   }
-
   // Press feedback on buttons and links
   if (!reduceMotion) {
-    M.press('[data-press]', function (el) {
-      animate(el, { scale: 0.96 }, { type: 'spring', visualDuration: 0.15, bounce: 0 });
-      return function () { animate(el, { scale: 1 }, SNAP); };
+    var pressed = null;
+    var release = function () {
+      if (!pressed) return;
+      G.to(pressed, { scale: 1, duration: 0.35, ease: 'back.out(2.5)', overwrite: 'auto' });
+      pressed = null;
+    };
+    document.addEventListener('pointerdown', function (e) {
+      var el = e.target.closest && e.target.closest('[data-press]');
+      if (!el) return;
+      pressed = el;
+      G.to(el, { scale: 0.96, duration: 0.12, ease: EASE, overwrite: 'auto' });
     });
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
   }
-
   initMotionToggle();
   startTyping();
   initCopy();
   initPalette();
+  initSkillMap();
 
   // ----------------------------------------------------------
   // Hero orb: a rotating particle sphere (paused off-screen,
@@ -658,14 +680,14 @@
   // Size the orb to the free space between the nav bar and the stats row,
   // so the sphere never runs under either of them.
   function fitOrb() {
-    var orb = $('#orb'), hero = $('#home'), stats = $('#stats');
-    if (!orb || !hero || !stats) return;
+    var orb = $('#orb'), hero = $('#home');
+    if (!orb || !hero) return;
     var vw = document.documentElement.clientWidth;
     var MARGIN = 36;
     var SPHERE = 0.95; // visible height of the outer shell as a share of the canvas size
     var heroTop = hero.getBoundingClientRect().top;
     var regionTop = ((nav && nav.offsetHeight) || 72) + MARGIN;
-    var regionBot = stats.getBoundingClientRect().top - heroTop - MARGIN;
+    var regionBot = hero.getBoundingClientRect().height - 96 - MARGIN; // clear of the pause control and scroll cue
     var cap = vw <= 768 ? vw * 1.05 : vw <= 1024 ? Math.min(vw * 0.8, 560) : Math.min(vw * 0.46, 620);
     var size;
     var top;
@@ -686,73 +708,6 @@
   // ============================================================
   // Projects gallery: vertical scroll moves the cards sideways
   // ============================================================
-  function initProjectGallery() {
-    var wrap = $('#projectScroll');
-    var track = $('#projectTrack');
-    if (!wrap || !track) return;
-    var cards = $$('.pcard', track);
-    var bar = $('#projectBar');
-    var idx = $('#projectIndex');
-
-    if (finePointer) {
-      cards.forEach(function (card) {
-        card.addEventListener('pointermove', function (e) {
-          var r = card.getBoundingClientRect();
-          card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-          card.style.setProperty('--my', (e.clientY - r.top) + 'px');
-        });
-      });
-    }
-
-    // Without Motion or with reduced motion, keep the swipeable row
-    if (!M || reduceMotion) return;
-
-    wrap.classList.add('hscroll--pinned');
-    var hint = $('#projectHint');
-    if (hint) hint.textContent = 'Scroll to explore';
-    var stops = [];
-    var dist = 0;
-    var lastWidth = 0;
-
-  function pad(n) { return (n < 10 ? '0' : '') + n; }
-
-  function build() {
-      stops.forEach(function (stop) { stop(); });
-      stops = [];
-      track.style.transform = '';
-      dist = Math.max(0, track.scrollWidth - document.documentElement.clientWidth);
-      wrap.style.setProperty('--hscroll-dist', dist + 'px');
-      lastWidth = window.innerWidth;
-
-      var opts = { target: wrap, offset: ['start start', 'end end'] };
-      stops.push(scroll(animate(track, { x: [0, -dist] }, { ease: 'linear' }), opts));
-      stops.push(scroll(function (progress) {
-        if (bar) bar.style.transform = 'scaleX(' + (0.2 + 0.8 * progress) + ')';
-        if (idx) idx.textContent = pad(Math.min(cards.length, Math.round(progress * (cards.length - 1)) + 1));
-      }, opts));
-    }
-
-    build();
-    var resizeTimer;
-    window.addEventListener('resize', function () {
-      if (window.innerWidth === lastWidth) return; // ignore mobile address-bar height changes
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(build, 200);
-    });
-
-    // Keyboard users: bring a focused card into view instead of leaving it off-screen
-    var sticky = $('#projectSticky');
-    track.addEventListener('focusin', function (e) {
-      var card = e.target.closest('.pcard');
-      if (sticky) sticky.scrollLeft = 0; // browsers without overflow: clip may scroll it on focus
-      if (!card || dist === 0) return;
-      var first = cards[0].offsetLeft;
-      var x = Math.min(dist, Math.max(0, card.offsetLeft - first));
-      var wrapTop = wrap.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: wrapTop + x, behavior: 'auto' });
-    });
-  }
-
   // ============================================================
   // Particle sphere renderer (canvas 2D, no dependencies)
   // ============================================================

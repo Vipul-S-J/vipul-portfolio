@@ -1,0 +1,178 @@
+{
+  "groups": [
+    {
+      "name": "Cloud & Compute",
+      "icon": "assets/icons/ec2.svg",
+      "items": [
+        {
+          "name": "EC2",
+          "uses": [
+            "aws-bluegreen-cicd",
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "Lambda",
+          "uses": []
+        },
+        {
+          "name": "S3",
+          "uses": [
+            "aws-bluegreen-cicd",
+            "ses-email-analytics-pipeline",
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "CloudFront",
+          "uses": []
+        },
+        {
+          "name": "ALB",
+          "uses": [
+            "aws-bluegreen-cicd",
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "EFS",
+          "uses": [
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "Auto Scaling",
+          "uses": [
+            "aws-bluegreen-cicd"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Networking & Security",
+      "icon": "assets/icons/vpc.svg",
+      "items": [
+        {
+          "name": "VPC",
+          "uses": [
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "VPC Peering",
+          "uses": [
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "Route 53",
+          "uses": []
+        },
+        {
+          "name": "IAM",
+          "uses": [
+            "aws-bluegreen-cicd",
+            "ses-email-analytics-pipeline",
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "WAF",
+          "uses": []
+        },
+        {
+          "name": "ACM / SSL",
+          "uses": []
+        },
+        {
+          "name": "VPN & MFA",
+          "uses": [
+            "secure-vpc-architecture"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Data & Migration",
+      "icon": "assets/icons/rds.svg",
+      "items": [
+        {
+          "name": "RDS",
+          "uses": [
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "DocumentDB",
+          "uses": [
+            "zero-downtime-db-migration"
+          ]
+        },
+        {
+          "name": "AWS DMS",
+          "uses": [
+            "zero-downtime-db-migration"
+          ]
+        },
+        {
+          "name": "Athena",
+          "uses": [
+            "ses-email-analytics-pipeline"
+          ]
+        },
+        {
+          "name": "Backups & Snapshots",
+          "uses": []
+        }
+      ]
+    },
+    {
+      "name": "Automation & Ops",
+      "icon": "assets/icons/cloudwatch.svg",
+      "items": [
+        {
+          "name": "GitLab CI/CD",
+          "uses": [
+            "aws-bluegreen-cicd"
+          ]
+        },
+        {
+          "name": "CodeDeploy",
+          "uses": [
+            "aws-bluegreen-cicd"
+          ]
+        },
+        {
+          "name": "Terraform",
+          "uses": [
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "CloudWatch",
+          "uses": [
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "SSM",
+          "uses": [
+            "secure-vpc-architecture"
+          ]
+        },
+        {
+          "name": "Bash / Python",
+          "uses": [
+            "aws-bluegreen-cicd"
+          ]
+        },
+        {
+          "name": "Linux",
+          "uses": [
+            "secure-vpc-architecture"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+ "lead": "Deployment automation for a production web application on AWS: a git push builds an artifact on a self-hosted GitLab Runner, stores it in S3, and AWS CodeDeploy rolls it out with a blue/green deployment onto an Auto Scaling Group that mixes Graviton and x86, On-Demand and Spot capacity.",
+ "sections": [
+  {
+   "id": "settings",
+   "title": "Key settings",
+   "table": [
+    [
+     "Deployment config",
+     "CodeDeployDefault.AllAtOnce"
+    ],
+    [
+     "Traffic control",
+     "Application Load Balancer shifts traffic from blue to green"
+    ],
+    [
+     "Green fleet",
+     "Created by copying the existing Auto Scaling Group"
+    ],
+    [
+     "Blue fleet",
+     "Terminated right after a successful deployment (0-minute wait)"
+    ],
+    [
+     "ASG max capacity",
+     "18 instances across 3 Availability Zones (1a, 1b, 1c)"
+    ],
+    [
+     "Spot allocation",
+     "price-capacity-optimized"
+    ],
+    [
+     "On-Demand base",
+     "1 instance"
+    ],
+    [
+     "On-Demand above base",
+     "30% (the rest is Spot)"
+    ],
+    [
+     "Instance mix",
+     "Graviton c7g.2xlarge; x86 c5, c4, c7i and m5a families"
+    ],
+    [
+     "Scaling policy",
+     "Target tracking on ALB requests per target, about 1,900 per target"
+    ]
+   ]
+  },
+  {
+   "id": "decisions",
+   "title": "Design decisions",
+   "bullets": [
+    "S3-based delivery instead of CodeDeploy's native Git integration: GitLab CI builds and zips the app, uploads it to S3 under a fixed naming convention, and CodeDeploy pulls it from there.",
+    "A diverse instance mix (Graviton and several x86 families) widens the Spot capacity pools AWS can draw from, which improves availability and reduces interruptions.",
+    "price-capacity-optimized Spot allocation picks the pools with the most available capacity at the best price, lowering interruption risk.",
+    "Scaling follows demand: target tracking scales out when average requests per target exceed the target and scales in when demand drops."
+   ]
+  },
+  {
+   "id": "repo",
+   "title": "What is in the repository",
+   "bullets": [
+    ".gitlab-ci.yml: build, upload and deploy stages, including the aws deploy push to S3",
+    "appspec.yml: CodeDeploy lifecycle hook mapping",
+    "Asg-mixed-instance-policy.json: the mixed-instances policy (Graviton + x86, Spot)",
+    "aws-cd/: lifecycle scripts (after_install, application_start, validate_service, after_block_traffic, update_lifecycle_hook)",
+    "docs/: CodeDeploy and GitLab setup guides. Account IDs, bucket and load balancer names are generic placeholders."
+   ]
+  }
+ ]
+}

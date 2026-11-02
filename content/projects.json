@@ -1,0 +1,144 @@
+{
+  "projects": [
+    {
+      "slug": "aws-bluegreen-cicd",
+      "num": "01",
+      "kind": "Featured",
+      "title": "AWS Blue/Green CI/CD Automation",
+      "desc": "Zero-downtime blue/green deployments with AWS CodeDeploy, fed by a GitLab CI → S3 artifact pipeline, on a mixed-instances Auto Scaling Group that blends Graviton and x86 across On-Demand and Spot.",
+      "color": "#C925D1",
+      "icon": {
+        "src": "assets/icons/codedeploy.svg",
+        "alt": "AWS CodeDeploy"
+      },
+      "flowLabel": "Pipeline: GitLab CI, then S3, then CodeDeploy, then ALB",
+      "flow": [
+        "GitLab CI",
+        "S3",
+        "CodeDeploy",
+        "ALB"
+      ],
+      "tags": [
+        "CodeDeploy",
+        "GitLab CI/CD",
+        "Auto Scaling",
+        "Spot"
+      ],
+      "repo": {
+        "url": "https://github.com/Vipul-S-J/aws-bluegreen-cicd",
+        "label": "View on GitHub"
+      },
+      "caseStudy": true
+    },
+    {
+      "slug": "ses-email-analytics-pipeline",
+      "num": "02",
+      "kind": "Featured",
+      "title": "SES Email Analytics Pipeline",
+      "desc": "A serverless pipeline that captures Amazon SES events (sends, deliveries, opens, clicks, bounces) in near real time and makes them queryable with SQL. Provisioned with CloudFormation.",
+      "color": "#DD344C",
+      "icon": {
+        "src": "assets/icons/ses.svg",
+        "alt": "Amazon Simple Email Service"
+      },
+      "flowLabel": "Pipeline: SES, then Kinesis Firehose, then S3, then Athena",
+      "flow": [
+        "SES",
+        "Firehose",
+        "S3",
+        "Athena"
+      ],
+      "tags": [
+        "SES",
+        "Kinesis Firehose",
+        "Athena",
+        "CloudFormation"
+      ],
+      "repo": {
+        "url": "https://github.com/Vipul-S-J/ses-email-analytics-pipeline",
+        "label": "View on GitHub"
+      },
+      "caseStudy": true
+    },
+    {
+      "slug": "secure-vpc-architecture",
+      "num": "03",
+      "kind": "Featured",
+      "title": "Secure VPC Architecture",
+      "desc": "A production AWS environment in Terraform: a 6-subnet VPC with NAT, an ALB in front of EC2, RDS MySQL and EFS, all encrypted with KMS. Audited with CloudTrail, GuardDuty and AWS Config, with OpenVPN access and VPC peering.",
+      "color": "#8C4FFF",
+      "icon": {
+        "src": "assets/icons/vpc.svg",
+        "alt": "Amazon VPC"
+      },
+      "flowLabel": "Request path: ALB, then EC2, which uses RDS and EFS",
+      "flow": [
+        "ALB",
+        "EC2",
+        "RDS",
+        "EFS"
+      ],
+      "tags": [
+        "Terraform",
+        "VPC",
+        "KMS",
+        "GuardDuty"
+      ],
+      "repo": {
+        "url": "https://github.com/Vipul-S-J/Secure-VPC-Architecture",
+        "label": "View on GitHub"
+      },
+      "caseStudy": true
+    },
+    {
+      "slug": "zero-downtime-db-migration",
+      "num": "04",
+      "kind": "Work",
+      "title": "Zero-Downtime DB Migration",
+      "desc": "Migrated a production MongoDB workload to Amazon DocumentDB using AWS DMS, with full data validation and minimal downtime.",
+      "color": "#C925D1",
+      "icon": {
+        "src": "assets/icons/dms.svg",
+        "alt": "AWS Database Migration Service"
+      },
+      "flowLabel": "Migration: MongoDB, then AWS DMS, then DocumentDB",
+      "flow": [
+        "MongoDB",
+        "AWS DMS",
+        "DocumentDB"
+      ],
+      "tags": [
+        "AWS DMS",
+        "DocumentDB",
+        "MongoDB"
+      ],
+      "repo": null,
+      "caseStudy": false
+    },
+    {
+      "slug": "more-aws-projects",
+      "num": "05",
+      "kind": "Repository",
+      "title": "More AWS projects",
+      "desc": "Hands-on infrastructure, automation, and security builds collected in one repository.",
+      "color": "#FF3B4E",
+      "icon": {
+        "src": "assets/icons/aws-cloud.svg",
+        "alt": "AWS Cloud"
+      },
+      "flowLabel": "",
+      "flow": [],
+      "tags": [
+        "AWS",
+        "IaC",
+        "Automation",
+        "Security"
+      ],
+      "repo": {
+        "url": "https://github.com/Vipul-S-J/AWS_Projects",
+        "label": "Browse the repo"
+      },
+      "caseStudy": false
+    }
+  ]
+}

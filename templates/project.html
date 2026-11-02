@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{{description}}" />
+  <meta name="theme-color" content="#0d0506" />
+  <link rel="canonical" href="{{url}}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="{{siteName}}" />
+  <meta property="og:title" content="{{pageTitle}}" />
+  <meta property="og:description" content="{{description}}" />
+  <meta property="og:url" content="{{url}}" />
+  <meta property="og:image" content="{{ogImage}}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{pageTitle}}" />
+  <meta name="twitter:description" content="{{description}}" />
+  <meta name="twitter:image" content="{{ogImage}}" />
+  <script type="application/ld+json">{{jsonld}}</script>
+  <title>{{pageTitle}}</title>
+  <script>
+    try { var t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+    document.documentElement.classList.add('js');
+    window.__revealFallback = setTimeout(function () { document.documentElement.classList.add('reveal-all'); }, 3500);
+  </script>
+  <link rel="preload" href="{{base}}assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0506'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' dominant-baseline='middle' font-family='monospace' font-weight='700' font-size='30' fill='%23ff3b4e'%3EVJ%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="{{base}}css/tokens.css" />
+  <link rel="stylesheet" href="{{base}}styles.css" />
+  <link rel="stylesheet" href="{{base}}css/components.css" />
+</head>
+<body class="page-case" style="--item-color: {{color}}">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" id="bgGlow" aria-hidden="true"></div>
+  {{nav}}
+  <main id="main" class="cs">
+    <nav class="cs__crumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="{{base}}">Home</a></li>
+        <li><a href="{{base}}#projects">Projects</a></li>
+        <li aria-current="page">{{title}}</li>
+      </ol>
+    </nav>
+    <header class="cs__head">
+      <img class="cs__icon" src="{{iconSrc}}" alt="{{iconAlt}}" width="64" height="64" />
+      <p class="cs__kind">Case study · {{kind}}</p>
+      <h1 class="cs__title">{{title}}</h1>
+      <p class="cs__lead">{{lead}}</p>
+      <div class="cs__meta">
+        <ul class="tags">{{tags}}</ul>
+        {{repo}}
+      </div>
+    </header>
+    <section class="cs__diagram" aria-labelledby="archTitle" data-reveal>
+      <h2 id="archTitle">Architecture: {{diagramTitle}}</h2>
+      {{diagram}}
+    </section>
+    {{sections}}
+    <nav class="cs__pager" aria-label="More case studies">
+      <a href="{{prevHref}}" rel="prev"><span>Previous</span><b>{{prevTitle}}</b></a>
+      <a href="{{nextHref}}" rel="next"><span>Next</span><b>{{nextTitle}}</b></a>
+    </nav>
+  </main>
+  <footer class="footer">
+    <p>Designed &amp; built by Vipul S Jain</p>
+  </footer>
+  <button class="to-top" id="toTop" type="button" aria-label="Back to top" tabindex="-1">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </button>
+  <script src="{{base}}vendor/gsap/gsap.min.js"></script>
+  <script src="{{base}}vendor/gsap/ScrollTrigger.min.js"></script>
+  <script src="{{base}}script.js"></script>
+  <script src="{{base}}js/diagram.js" defer></script>
+</body>
+</html>

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://vipul-s-j.github.io/vipul-portfolio/</loc></url>
+  <url><loc>https://vipul-s-j.github.io/vipul-portfolio/projects/aws-bluegreen-cicd/</loc></url>
+  <url><loc>https://vipul-s-j.github.io/vipul-portfolio/projects/ses-email-analytics-pipeline/</loc></url>
+  <url><loc>https://vipul-s-j.github.io/vipul-portfolio/projects/secure-vpc-architecture/</loc></url>
 </urlset>

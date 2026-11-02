@@ -1,0 +1,195 @@
+/* ============================================================
+   Upgrade layer: loaded after styles.css.
+   Hero, proof strip, project cards, skills map, case studies, architecture diagrams.
+   Colours come from tokens only (see tokens.css).
+   ============================================================ */
+
+/* ---------- 44px hit areas (WCAG 2.2 target size) ---------- */
+.nav__logo { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.25rem; }
+.nav__links a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.85rem; }
+.cmdk-btn, .js .cmdk-btn { min-height: 44px; }
+.js .cmdk-btn { height: 44px; }
+.icon-btn, .nav__gh { width: 44px; height: 44px; }
+.nav__toggle { width: 44px; height: 44px; }
+.motion-toggle { min-height: 44px; }
+.gh-btn { min-height: 44px; }
+.intro__skip { min-height: 44px; }
+.cmdk__item { min-height: 44px; }
+@media (max-width: 1100px) { .js .cmdk-btn { width: 44px; } }
+
+/* ---------- Hero: one dominant visual, name loudest ---------- */
+.hero__grid { max-width: 46rem; }
+.hero__eyebrow {
+  padding: 0; background: none; border: 0; border-radius: 0;
+  margin-bottom: 1.1rem; color: var(--primary);
+  letter-spacing: 0.02em;
+}
+.hero__title {
+  font-size: clamp(3rem, 8.4vw, 7rem); line-height: 0.98; letter-spacing: -0.045em; font-weight: 700;
+  text-wrap: balance;
+}
+.hero__title .grad::before { content: '\A'; white-space: pre; }  /* name on its own line, the full stop stays attached */
+.hero__subtitle { margin-top: 1.1rem; }
+.hero__lead { max-width: 36rem; }
+
+/* ---------- Proof strip (stats, directly under the hero) ---------- */
+.proof { position: relative; z-index: 1; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.proof .stats { margin-top: 0; }
+.stat b { font-variant-numeric: tabular-nums; }
+
+/* ---------- Selected work: vertical bento ---------- */
+.work__list { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1.5rem; }
+.work__list > li { grid-column: span 6; min-width: 0; }
+.work__list > li:nth-child(1) { grid-column: span 7; }
+.work__list > li:nth-child(2) { grid-column: span 5; }
+.work__list > li:nth-child(3) { grid-column: span 5; }
+.work__list > li:nth-child(4) { grid-column: span 7; }
+.work__list > li:nth-child(5) { grid-column: span 12; }
+@media (max-width: 900px) { .work__list > li, .work__list > li:nth-child(n) { grid-column: 1 / -1; } }
+.pcard { scroll-snap-align: none; height: auto; }
+.pcard__inner { display: flex; flex-direction: column; height: 100%; padding: 1.75rem; }
+.pcard__top { margin-bottom: 0.25rem; }
+.pcard__desc { flex: 1 1 auto; }
+.pcard .flow { margin-top: 1.25rem; }
+.pcard__foot { flex-direction: column; align-items: flex-start; gap: 1rem; }
+.pcard__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; position: relative; z-index: 2; }
+.pcard__link { color: inherit; }
+.pcard__link::after { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: inherit; }
+.pcard__link:focus-visible { outline: none; }
+.pcard--link:has(.pcard__link:focus-visible) { outline: 2px solid var(--ring); outline-offset: 3px; }
+.pcard--link { cursor: pointer; }
+.pcard__cta {
+  display: inline-flex; align-items: center; gap: 0.4rem; min-height: 44px; padding: 0 0.95rem; border-radius: 10px;
+  font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600;
+  color: var(--primary-foreground); background: color-mix(in srgb, var(--item-color) 88%, #fff 0%);
+}
+.pcard__cta i { font-style: normal; transition: transform var(--dur-2) var(--ease-out); }
+.pcard--link:hover .pcard__cta i, .pcard--link:focus-within .pcard__cta i { transform: translateX(4px); }
+/* mini diagram: the flow chips light up one after another, like a packet moving along the path */
+@keyframes flow-hop {
+  0%, 55%, 100% { border-color: var(--border); color: var(--slate-lightest); box-shadow: none; }
+  15%, 35% { border-color: color-mix(in srgb, var(--item-color) 80%, transparent); color: #fff; box-shadow: 0 0 14px -2px color-mix(in srgb, var(--item-color) 70%, transparent); }
+}
+.pcard:hover .flow li span, .pcard:focus-within .flow li span { animation: flow-hop 2s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 0.28s); }
+.motion-paused .pcard .flow li span { animation: none !important; }
+/* skill map: related projects stand out, others step back */
+.pcard { transition: border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease, filter 0.3s ease; }
+.skill-active .pcard:not(.is-related) { opacity: 0.45; filter: saturate(0.6); }
+.pcard.is-related { border-color: color-mix(in srgb, var(--item-color) 75%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--item-color) 60%, transparent), 0 24px 50px -24px color-mix(in srgb, var(--item-color) 55%, transparent); }
+
+/* ---------- Skills: chips are buttons now ---------- */
+.chips li, .chips li:hover { padding: 0; background: none; border: 0; border-radius: 0; color: inherit; min-height: 0; }
+.chip {
+  font: inherit; font-family: var(--font-mono); font-size: 0.82rem; color: var(--slate-light);
+  min-height: 44px; padding: 0 0.85rem; border-radius: 999px;
+  background: rgb(var(--ink-rgb) / 0.04); border: 1px solid var(--border);
+  transition: color var(--dur-2) ease, background var(--dur-2) ease, border-color var(--dur-2) ease, transform var(--dur-2) var(--ease-out);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip[data-uses=""] { cursor: default; }
+.chip:hover, .chip.is-on, .chip[aria-pressed="true"] { color: var(--primary); border-color: var(--border-strong); background: var(--primary-tint); }
+.chip[aria-pressed="true"] { color: var(--primary-foreground); background: var(--primary); border-color: var(--primary); }
+.skills__hint { margin-top: 1.1rem; min-height: 1.6em; font-family: var(--font-mono); font-size: 0.82rem; color: var(--slate); }
+.certs { margin-top: 3rem; }
+.certs__title { margin-bottom: 1rem; font-size: 1.25rem; color: var(--slate-lightest); }
+.certs__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.cert { display: flex; gap: 1rem; align-items: center; padding: 1.1rem 1.25rem; }
+.cert h4 { color: var(--slate-lightest); font-size: 1rem; }
+.cert p { font-size: 0.85rem; }
+.cert a { font-family: var(--font-mono); font-size: 0.8rem; color: var(--primary); }
+
+/* ---------- Timeline: technologies row ---------- */
+.tl-tech { margin-top: 1rem; }
+.tl-tech summary {
+  display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; cursor: pointer;
+  font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate);
+  list-style: none;
+}
+.tl-tech summary::-webkit-details-marker { display: none; }
+.tl-tech summary::before { content: '▸'; color: var(--primary); transition: transform var(--dur-2) var(--ease-out); }
+.tl-tech[open] summary::before { transform: rotate(90deg); }
+.tl-tech .tags { margin-top: 0.25rem; }
+
+/* ---------- Small buttons (diagram controls) ---------- */
+.btn-sm {
+  min-height: 44px; padding: 0 1.1rem; border-radius: 10px;
+  font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600; color: var(--slate-light);
+  border: 1px solid var(--border); background: rgb(var(--ink-rgb) / 0.03);
+  transition: color var(--dur-2) ease, border-color var(--dur-2) ease, background var(--dur-2) ease;
+}
+.btn-sm:hover { color: var(--primary); border-color: var(--border-strong); background: var(--primary-tint); }
+.btn-sm--primary { color: var(--primary-foreground); background: var(--primary); border-color: var(--primary); }
+.btn-sm--primary:hover { color: var(--primary-foreground); filter: brightness(1.08); background: var(--primary); }
+
+/* ---------- Case study page ---------- */
+.cs { position: relative; z-index: 1; max-width: var(--max); margin: 0 auto; padding: calc(var(--nav-h) + 1.5rem) var(--gutter) 5rem; }
+.cs__crumbs ol { display: flex; flex-wrap: wrap; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--slate); }
+.cs__crumbs li + li::before { content: '/'; margin-right: 0.5rem; opacity: 0.5; }
+.cs__crumbs a { display: inline-flex; align-items: center; min-height: 44px; }
+.cs__crumbs a:hover { color: var(--primary); }
+.cs__head { margin-top: 0.5rem; max-width: 52rem; }
+.cs__icon { border-radius: 14px; box-shadow: 0 14px 40px -14px var(--item-color); }
+.cs__kind { margin-top: 1.25rem; font-family: var(--font-mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: color-mix(in srgb, var(--item-color) 70%, var(--foreground)); }
+.cs__title { margin-top: 0.5rem; font-size: clamp(2.2rem, 5.6vw, 4rem); line-height: 1.05; letter-spacing: -0.035em; color: var(--slate-lightest); text-wrap: balance; }
+.cs__lead { margin-top: 1.25rem; font-size: 1.15rem; color: var(--slate-light); max-width: 46rem; }
+.cs__meta { margin-top: 1.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+.cs__meta .tags { margin-top: 0; }
+.cs__diagram { margin-top: 3rem; padding: clamp(1rem, 3vw, 2rem); border-radius: 20px; background: var(--card); border: 1px solid var(--border); }
+.cs__diagram h2, .cs__section h2 { font-size: 1.35rem; letter-spacing: -0.01em; color: var(--slate-lightest); }
+.cs__section { margin-top: 3.5rem; max-width: 52rem; }
+.cs__list { margin-top: 1rem; display: grid; gap: 0.8rem; }
+.cs__list li { position: relative; padding-left: 1.4rem; color: var(--slate-light); }
+.cs__list li::before { content: '▹'; position: absolute; left: 0; color: var(--primary); }
+.cs__table { margin-top: 1rem; border-top: 1px solid var(--border); }
+.cs__table > div { display: grid; grid-template-columns: minmax(8rem, 14rem) 1fr; gap: 1rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border); }
+.cs__table dt { font-family: var(--font-mono); font-size: 0.8rem; color: var(--slate); }
+.cs__table dd { color: var(--slate-lightest); }
+@media (max-width: 640px) { .cs__table > div { grid-template-columns: 1fr; gap: 0.2rem; } }
+.cs__pager { margin-top: 5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.cs__pager a { display: block; padding: 1.25rem 1.5rem; border-radius: 16px; border: 1px solid var(--border); background: var(--card); transition: border-color var(--dur-2) ease, transform var(--dur-3) var(--ease-out); }
+.cs__pager a:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+.cs__pager a[rel="next"] { text-align: right; }
+.cs__pager span { display: block; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate); }
+.cs__pager b { display: block; margin-top: 0.3rem; color: var(--slate-lightest); font-size: 1.05rem; }
+@media (max-width: 640px) { .cs__pager { grid-template-columns: 1fr; } .cs__pager a[rel="next"] { text-align: left; } }
+
+/* ---------- Architecture diagram ---------- */
+.arch { margin-top: 1.25rem; }
+.arch__svg { display: block; width: 100%; height: auto; overflow: visible; }
+.arch__svg--m { display: none; max-width: 420px; margin-inline: auto; }
+@media (max-width: 760px) { .arch__svg--d { display: none; } .arch__svg--m { display: block; } }
+.arch__group rect { fill: color-mix(in srgb, var(--k) 7%, transparent); stroke: color-mix(in srgb, var(--k) 55%, transparent); stroke-dasharray: 5 5; stroke-width: 1.2; }
+.arch__group text { fill: color-mix(in srgb, var(--k) 70%, var(--foreground)); font: 600 11px var(--font-mono); letter-spacing: 0.04em; }
+.arch__edge { fill: none; stroke: var(--muted-foreground); stroke-width: 1.8; stroke-linejoin: round; transition: stroke var(--dur-3) ease, opacity var(--dur-3) ease; }
+.arch__node rect { fill: var(--popover); stroke: color-mix(in srgb, var(--k) 45%, var(--border)); stroke-width: 1.3; transition: fill var(--dur-3) ease, stroke var(--dur-3) ease, filter var(--dur-3) ease; }
+.arch__glyph { color: var(--k); }
+.arch__label { fill: var(--foreground); font: 600 13.5px var(--font-sans); }
+.arch__sub { fill: var(--muted-foreground); font: 500 11px var(--font-mono); }
+.arch__node:focus-visible { outline: none; }
+.arch__node:focus-visible rect { stroke: var(--ring); stroke-width: 2.5; }
+.arch__packet { fill: var(--accent); opacity: 0; offset-rotate: 0deg; }
+/* JS adds .arch--js: unlit things dim, lit things glow. Without JS everything shows in its final state. */
+.arch--js .arch__node, .arch--js .arch__group { opacity: 0.32; transition: opacity var(--dur-3) ease; }
+.arch--js .arch__edge { opacity: 0.2; }
+.arch--js .arch__node.is-lit, .arch--js .arch__group.is-lit { opacity: 1; }
+.arch--js .arch__edge.is-lit { opacity: 1; stroke: var(--k-edge, var(--primary)); }
+.arch--js .arch__node.is-current rect { stroke: var(--accent); filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 60%, transparent)); }
+.arch--js .arch__node.is-retired { opacity: 0.35; }
+.arch--js .arch__node.is-retired rect { stroke-dasharray: 4 4; }
+.arch__controls { margin-top: 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.arch__status { flex: 1 1 14rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent); min-height: 1.4em; }
+.arch__steps { margin-top: 1.5rem; display: grid; gap: 0.7rem; counter-reset: s; }
+.arch__steps li { counter-increment: s; position: relative; padding-left: 2.6rem; color: var(--slate-light); transition: color var(--dur-2) ease; }
+.arch__steps li::before {
+  content: counter(s); position: absolute; left: 0; top: 0.05em; width: 1.7rem; height: 1.7rem; display: grid; place-items: center;
+  border-radius: 50%; font: 600 0.75rem var(--font-mono); color: var(--slate); border: 1px solid var(--border);
+}
+.arch__steps li.is-current { color: var(--slate-lightest); }
+.arch__steps li.is-current::before, .arch__steps li.is-done::before { color: var(--primary-foreground); background: var(--primary); border-color: var(--primary); }
+
+/* ---------- Reduced motion for the new parts ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .pcard:hover .flow li span, .pcard:focus-within .flow li span { animation: none; }
+  .pcard__link::after, .pcard__cta i { transition: none; }
+}
+@media print { .arch__controls { display: none !important; } .arch--js .arch__node, .arch--js .arch__group, .arch--js .arch__edge { opacity: 1 !important; } }

@@ -1,0 +1,4 @@
+[
+  { "path": "projects.1.desc", "from": "Terraform", "to": "CloudFormation", "reason": "Owner confirmed SES pipeline is CloudFormation (repo README agrees)" },
+  { "path": "projects.1.tags", "from": "Terraform", "to": "CloudFormation", "reason": "Same correction on the tag chip" }
+]

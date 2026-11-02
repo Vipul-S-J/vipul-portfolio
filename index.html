@@ -31,7 +31,7 @@
     (function () {
       var root = document.documentElement, pending = false;
       try {
-        pending = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        pending = !window.matchMedia('(prefers-reduced-motion: reduce)').matches && !/[?&]intro=off(&|$)/.test(location.search);
       } catch (e) {}
       if (pending) {
         root.classList.add('intro-pending', 'intro-active');
@@ -43,11 +43,12 @@
       }, pending ? 12500 : 3500);
     })();
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="preload" href="assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/geist-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0506'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' dominant-baseline='middle' font-family='monospace' font-weight='700' font-size='30' fill='%23ff3b4e'%3EVJ%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="css/components.css" />
 </head>
 <body>
   <div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="Intro animation">
@@ -188,12 +189,6 @@
         </div>
       </div>
 
-      <ul class="stats" id="stats">
-        <li class="stat" data-stat><b data-count="3" data-suffix="+">0</b><span>years on AWS</span></li>
-        <li class="stat" data-stat><b data-count="40" data-prefix="~" data-suffix="%">0</b><span>faster incident response</span></li>
-        <li class="stat" data-stat><b data-count="20" data-suffix="+">0</b><span>resources monitored</span></li>
-        <li class="stat" data-stat><b data-count="18">0</b><span>instance Spot + On-Demand fleet</span></li>
-      </ul>
 
       <button class="motion-toggle" id="motionToggle" type="button" aria-pressed="false" hidden>
         <svg class="i-pause" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
@@ -203,116 +198,108 @@
 
       <a class="scroll-cue" href="#projects" aria-label="Scroll to projects"><span></span></a>
     </section>
+    <section class="proof" aria-label="At a glance">
+      <ul class="stats" id="stats">
+        <li class="stat" data-stat><b data-count="3" data-suffix="+">0</b><span>years on AWS</span></li>
+        <li class="stat" data-stat><b data-count="40" data-prefix="~" data-suffix="%">0</b><span>faster incident response</span></li>
+        <li class="stat" data-stat><b data-count="20" data-suffix="+">0</b><span>resources monitored</span></li>
+        <li class="stat" data-stat><b data-count="18">0</b><span>instance Spot + On-Demand fleet</span></li>
+      </ul>
+    </section>
 
     <!-- Projects -->
-    <section class="projects-section" id="projects">
-      <header class="section__head section__head--projects" data-reveal>
+    <section class="section" id="projects">
+      <header class="section__head" data-reveal>
         <span class="section__num">01</span>
         <h2 class="section__title">Things I've built</h2>
       </header>
 
-      <div class="hscroll" id="projectScroll">
-        <div class="hscroll__sticky" id="projectSticky">
-          <ol class="hscroll__track" id="projectTrack" aria-label="Projects">
-            <li class="pcard" style="--item-color: #C925D1">
-              <article class="pcard__inner">
-                <div class="pcard__top">
-                  <img class="pcard__icon" src="assets/icons/codedeploy.svg" alt="AWS CodeDeploy" width="56" height="56" loading="lazy" />
-                  <span class="pcard__num" aria-hidden="true">01</span>
-                </div>
-                <p class="pcard__kind">Featured</p>
-                <h3 class="pcard__title">AWS Blue/Green CI/CD Automation</h3>
-                <p class="pcard__desc">Zero-downtime blue/green deployments with AWS CodeDeploy, fed by a GitLab CI → S3 artifact pipeline, on a mixed-instances Auto Scaling Group that blends Graviton and x86 across On-Demand and Spot.</p>
-                <ol class="flow" data-flow aria-label="Pipeline: GitLab CI, then S3, then CodeDeploy, then ALB"><li><span>GitLab CI</span></li><li><span>S3</span></li><li><span>CodeDeploy</span></li><li><span>ALB</span></li></ol>
-                <div class="pcard__foot">
-                  <ul class="tags"><li>CodeDeploy</li><li>GitLab CI/CD</li><li>Auto Scaling</li><li>Spot</li></ul>
-                  <a class="gh-btn" href="https://github.com/Vipul-S-J/aws-bluegreen-cicd" target="_blank" rel="noopener" data-press>
-                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                    View on GitHub
-                  </a>
-                </div>
-              </article>
-            </li>
-            <li class="pcard" style="--item-color: #DD344C">
-              <article class="pcard__inner">
-                <div class="pcard__top">
-                  <img class="pcard__icon" src="assets/icons/ses.svg" alt="Amazon Simple Email Service" width="56" height="56" loading="lazy" />
-                  <span class="pcard__num" aria-hidden="true">02</span>
-                </div>
-                <p class="pcard__kind">Featured</p>
-                <h3 class="pcard__title">SES Email Analytics Pipeline</h3>
-                <p class="pcard__desc">A serverless pipeline that captures Amazon SES events (sends, deliveries, opens, clicks, bounces) in near real time and makes them queryable with SQL. Provisioned with Terraform.</p>
-                <ol class="flow" data-flow aria-label="Pipeline: SES, then Kinesis Firehose, then S3, then Athena"><li><span>SES</span></li><li><span>Firehose</span></li><li><span>S3</span></li><li><span>Athena</span></li></ol>
-                <div class="pcard__foot">
-                  <ul class="tags"><li>SES</li><li>Kinesis Firehose</li><li>Athena</li><li>Terraform</li></ul>
-                  <a class="gh-btn" href="https://github.com/Vipul-S-J/ses-email-analytics-pipeline" target="_blank" rel="noopener" data-press>
-                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                    View on GitHub
-                  </a>
-                </div>
-              </article>
-            </li>
-            <li class="pcard" style="--item-color: #8C4FFF">
-              <article class="pcard__inner">
-                <div class="pcard__top">
-                  <img class="pcard__icon" src="assets/icons/vpc.svg" alt="Amazon VPC" width="56" height="56" loading="lazy" />
-                  <span class="pcard__num" aria-hidden="true">03</span>
-                </div>
-                <p class="pcard__kind">Featured</p>
-                <h3 class="pcard__title">Secure VPC Architecture</h3>
-                <p class="pcard__desc">A production AWS environment in Terraform: a 6-subnet VPC with NAT, an ALB in front of EC2, RDS MySQL and EFS, all encrypted with KMS. Audited with CloudTrail, GuardDuty and AWS Config, with OpenVPN access and VPC peering.</p>
-                <ol class="flow" data-flow aria-label="Request path: ALB, then EC2, which uses RDS and EFS"><li><span>ALB</span></li><li><span>EC2</span></li><li><span>RDS</span></li><li><span>EFS</span></li></ol>
-                <div class="pcard__foot">
-                  <ul class="tags"><li>Terraform</li><li>VPC</li><li>KMS</li><li>GuardDuty</li></ul>
-                  <a class="gh-btn" href="https://github.com/Vipul-S-J/Secure-VPC-Architecture" target="_blank" rel="noopener" data-press>
-                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                    View on GitHub
-                  </a>
-                </div>
-              </article>
-            </li>
-            <li class="pcard" style="--item-color: #C925D1">
-              <article class="pcard__inner">
-                <div class="pcard__top">
-                  <img class="pcard__icon" src="assets/icons/dms.svg" alt="AWS Database Migration Service" width="56" height="56" loading="lazy" />
-                  <span class="pcard__num" aria-hidden="true">04</span>
-                </div>
-                <p class="pcard__kind">Work</p>
-                <h3 class="pcard__title">Zero-Downtime DB Migration</h3>
-                <p class="pcard__desc">Migrated a production MongoDB workload to Amazon DocumentDB using AWS DMS, with full data validation and minimal downtime.</p>
-                <ol class="flow" data-flow aria-label="Migration: MongoDB, then AWS DMS, then DocumentDB"><li><span>MongoDB</span></li><li><span>AWS DMS</span></li><li><span>DocumentDB</span></li></ol>
-                <div class="pcard__foot">
-                  <ul class="tags"><li>AWS DMS</li><li>DocumentDB</li><li>MongoDB</li></ul>
-                </div>
-              </article>
-            </li>
-            <li class="pcard" style="--item-color: #FF3B4E">
-              <article class="pcard__inner">
-                <div class="pcard__top">
-                  <img class="pcard__icon" src="assets/icons/aws-cloud.svg" alt="AWS Cloud" width="56" height="56" loading="lazy" />
-                  <span class="pcard__num" aria-hidden="true">05</span>
-                </div>
-                <p class="pcard__kind">Repository</p>
-                <h3 class="pcard__title">More AWS projects</h3>
-                <p class="pcard__desc">Hands-on infrastructure, automation, and security builds collected in one repository.</p>
-                <div class="pcard__foot">
-                  <ul class="tags"><li>AWS</li><li>IaC</li><li>Automation</li><li>Security</li></ul>
-                  <a class="gh-btn" href="https://github.com/Vipul-S-J/AWS_Projects" target="_blank" rel="noopener" data-press>
-                    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                    Browse the repo
-                  </a>
-                </div>
-              </article>
-            </li>
-          </ol>
-          <div class="hscroll__meta" id="projectMeta" aria-hidden="true">
-            <span class="hscroll__count"><b id="projectIndex">01</b> / 05</span>
-            <span class="hscroll__bar"><i id="projectBar"></i></span>
-            <span class="hscroll__hint" id="projectHint">Swipe to see more</span>
-          </div>
-        </div>
+      <div class="work" id="work">
+        <!-- build:projects -->
+<ol class="work__list" aria-label="Projects">
+<li class="pcard pcard--link" data-slug="aws-bluegreen-cicd" style="--item-color: #C925D1" data-tilt>
+  <article class="pcard__inner">
+    <div class="pcard__top">
+      <img class="pcard__icon" src="assets/icons/codedeploy.svg" alt="AWS CodeDeploy" width="56" height="56" loading="lazy" />
+      <span class="pcard__num" aria-hidden="true">01</span>
+    </div>
+    <p class="pcard__kind">Featured</p>
+    <h3 class="pcard__title"><a class="pcard__link" href="projects/aws-bluegreen-cicd/">AWS Blue/Green CI/CD Automation</a></h3>
+    <p class="pcard__desc">Zero-downtime blue/green deployments with AWS CodeDeploy, fed by a GitLab CI → S3 artifact pipeline, on a mixed-instances Auto Scaling Group that blends Graviton and x86 across On-Demand and Spot.</p>
+    <ol class="flow" data-flow aria-label="Pipeline: GitLab CI, then S3, then CodeDeploy, then ALB"><li style="--i:0"><span>GitLab CI</span></li><li style="--i:1"><span>S3</span></li><li style="--i:2"><span>CodeDeploy</span></li><li style="--i:3"><span>ALB</span></li></ol>
+    <div class="pcard__foot">
+      <ul class="tags"><li>CodeDeploy</li><li>GitLab CI/CD</li><li>Auto Scaling</li><li>Spot</li></ul>
+      <div class="pcard__actions"><span class="pcard__cta" aria-hidden="true">Case study <i>→</i></span><a class="gh-btn" href="https://github.com/Vipul-S-J/aws-bluegreen-cicd" target="_blank" rel="noopener" data-press><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub</a></div>
+    </div>
+  </article>
+</li>
+<li class="pcard pcard--link" data-slug="ses-email-analytics-pipeline" style="--item-color: #DD344C" data-tilt>
+  <article class="pcard__inner">
+    <div class="pcard__top">
+      <img class="pcard__icon" src="assets/icons/ses.svg" alt="Amazon Simple Email Service" width="56" height="56" loading="lazy" />
+      <span class="pcard__num" aria-hidden="true">02</span>
+    </div>
+    <p class="pcard__kind">Featured</p>
+    <h3 class="pcard__title"><a class="pcard__link" href="projects/ses-email-analytics-pipeline/">SES Email Analytics Pipeline</a></h3>
+    <p class="pcard__desc">A serverless pipeline that captures Amazon SES events (sends, deliveries, opens, clicks, bounces) in near real time and makes them queryable with SQL. Provisioned with CloudFormation.</p>
+    <ol class="flow" data-flow aria-label="Pipeline: SES, then Kinesis Firehose, then S3, then Athena"><li style="--i:0"><span>SES</span></li><li style="--i:1"><span>Firehose</span></li><li style="--i:2"><span>S3</span></li><li style="--i:3"><span>Athena</span></li></ol>
+    <div class="pcard__foot">
+      <ul class="tags"><li>SES</li><li>Kinesis Firehose</li><li>Athena</li><li>CloudFormation</li></ul>
+      <div class="pcard__actions"><span class="pcard__cta" aria-hidden="true">Case study <i>→</i></span><a class="gh-btn" href="https://github.com/Vipul-S-J/ses-email-analytics-pipeline" target="_blank" rel="noopener" data-press><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub</a></div>
+    </div>
+  </article>
+</li>
+<li class="pcard pcard--link" data-slug="secure-vpc-architecture" style="--item-color: #8C4FFF" data-tilt>
+  <article class="pcard__inner">
+    <div class="pcard__top">
+      <img class="pcard__icon" src="assets/icons/vpc.svg" alt="Amazon VPC" width="56" height="56" loading="lazy" />
+      <span class="pcard__num" aria-hidden="true">03</span>
+    </div>
+    <p class="pcard__kind">Featured</p>
+    <h3 class="pcard__title"><a class="pcard__link" href="projects/secure-vpc-architecture/">Secure VPC Architecture</a></h3>
+    <p class="pcard__desc">A production AWS environment in Terraform: a 6-subnet VPC with NAT, an ALB in front of EC2, RDS MySQL and EFS, all encrypted with KMS. Audited with CloudTrail, GuardDuty and AWS Config, with OpenVPN access and VPC peering.</p>
+    <ol class="flow" data-flow aria-label="Request path: ALB, then EC2, which uses RDS and EFS"><li style="--i:0"><span>ALB</span></li><li style="--i:1"><span>EC2</span></li><li style="--i:2"><span>RDS</span></li><li style="--i:3"><span>EFS</span></li></ol>
+    <div class="pcard__foot">
+      <ul class="tags"><li>Terraform</li><li>VPC</li><li>KMS</li><li>GuardDuty</li></ul>
+      <div class="pcard__actions"><span class="pcard__cta" aria-hidden="true">Case study <i>→</i></span><a class="gh-btn" href="https://github.com/Vipul-S-J/Secure-VPC-Architecture" target="_blank" rel="noopener" data-press><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub</a></div>
+    </div>
+  </article>
+</li>
+<li class="pcard" data-slug="zero-downtime-db-migration" style="--item-color: #C925D1" data-tilt>
+  <article class="pcard__inner">
+    <div class="pcard__top">
+      <img class="pcard__icon" src="assets/icons/dms.svg" alt="AWS Database Migration Service" width="56" height="56" loading="lazy" />
+      <span class="pcard__num" aria-hidden="true">04</span>
+    </div>
+    <p class="pcard__kind">Work</p>
+    <h3 class="pcard__title">Zero-Downtime DB Migration</h3>
+    <p class="pcard__desc">Migrated a production MongoDB workload to Amazon DocumentDB using AWS DMS, with full data validation and minimal downtime.</p>
+    <ol class="flow" data-flow aria-label="Migration: MongoDB, then AWS DMS, then DocumentDB"><li style="--i:0"><span>MongoDB</span></li><li style="--i:1"><span>AWS DMS</span></li><li style="--i:2"><span>DocumentDB</span></li></ol>
+    <div class="pcard__foot">
+      <ul class="tags"><li>AWS DMS</li><li>DocumentDB</li><li>MongoDB</li></ul>
+      <div class="pcard__actions"></div>
+    </div>
+  </article>
+</li>
+<li class="pcard" data-slug="more-aws-projects" style="--item-color: #FF3B4E" data-tilt>
+  <article class="pcard__inner">
+    <div class="pcard__top">
+      <img class="pcard__icon" src="assets/icons/aws-cloud.svg" alt="AWS Cloud" width="56" height="56" loading="lazy" />
+      <span class="pcard__num" aria-hidden="true">05</span>
+    </div>
+    <p class="pcard__kind">Repository</p>
+    <h3 class="pcard__title">More AWS projects</h3>
+    <p class="pcard__desc">Hands-on infrastructure, automation, and security builds collected in one repository.</p>
+    
+    <div class="pcard__foot">
+      <ul class="tags"><li>AWS</li><li>IaC</li><li>Automation</li><li>Security</li></ul>
+      <div class="pcard__actions"><a class="gh-btn" href="https://github.com/Vipul-S-J/AWS_Projects" target="_blank" rel="noopener" data-press><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Browse the repo</a></div>
+    </div>
+  </article>
+</li>
+</ol>
+<!-- /build:projects -->
       </div>
-
     </section>
 
     <!-- Experience -->
@@ -337,7 +324,7 @@
               <li>Reduced incident response time ~40% with CloudWatch dashboards and proactive alerting across 20+ resources.</li>
               <li>Managed RDS and DocumentDB with automated backups and point-in-time recovery.</li>
             </ul>
-            <ul class="tags"><li>EC2</li><li>VPC</li><li>IAM</li><li>WAF</li><li>CloudWatch</li><li>RDS</li></ul>
+            <details class="tl-tech" open><summary>Technologies used</summary><ul class="tags"><li>EC2</li><li>VPC</li><li>IAM</li><li>WAF</li><li>CloudWatch</li><li>RDS</li></ul></details>
           </div>
         </article>
         <article class="tl-item" data-reveal>
@@ -351,7 +338,7 @@
               <li>Migrated MongoDB to Amazon DocumentDB using AWS DMS with minimal-downtime replication and full data validation.</li>
               <li>Built CI/CD pipelines with GitLab CI/CD and AWS CodeDeploy for consistent, version-controlled releases on EC2.</li>
             </ul>
-            <ul class="tags"><li>AWS DMS</li><li>DocumentDB</li><li>GitLab CI/CD</li><li>CodeDeploy</li></ul>
+            <details class="tl-tech" open><summary>Technologies used</summary><ul class="tags"><li>AWS DMS</li><li>DocumentDB</li><li>GitLab CI/CD</li><li>CodeDeploy</li></ul></details>
           </div>
         </article>
       </div>
@@ -363,44 +350,50 @@
         <span class="section__num">03</span>
         <h2 class="section__title">Skills &amp; tech</h2>
       </header>
-      <div class="skills" data-stagger>
-        <article class="skill-card card" data-tilt>
-          <div class="skill-card__head">
-            <img src="assets/icons/ec2.svg" alt="" width="40" height="40" />
-            <h3>Cloud &amp; Compute</h3>
-          </div>
-          <ul class="chips">
-            <li>EC2</li><li>Lambda</li><li>S3</li><li>CloudFront</li><li>ALB</li><li>EFS</li><li>Auto Scaling</li>
-          </ul>
-        </article>
-        <article class="skill-card card" data-tilt>
-          <div class="skill-card__head">
-            <img src="assets/icons/vpc.svg" alt="" width="40" height="40" />
-            <h3>Networking &amp; Security</h3>
-          </div>
-          <ul class="chips">
-            <li>VPC</li><li>VPC Peering</li><li>Route 53</li><li>IAM</li><li>WAF</li><li>ACM / SSL</li><li>VPN &amp; MFA</li>
-          </ul>
-        </article>
-        <article class="skill-card card" data-tilt>
-          <div class="skill-card__head">
-            <img src="assets/icons/rds.svg" alt="" width="40" height="40" />
-            <h3>Data &amp; Migration</h3>
-          </div>
-          <ul class="chips">
-            <li>RDS</li><li>DocumentDB</li><li>AWS DMS</li><li>Athena</li><li>Backups &amp; Snapshots</li>
-          </ul>
-        </article>
-        <article class="skill-card card" data-tilt>
-          <div class="skill-card__head">
-            <img src="assets/icons/cloudwatch.svg" alt="" width="40" height="40" />
-            <h3>Automation &amp; Ops</h3>
-          </div>
-          <ul class="chips">
-            <li>GitLab CI/CD</li><li>CodeDeploy</li><li>Terraform</li><li>CloudWatch</li><li>SSM</li><li>Bash / Python</li><li>Linux</li>
-          </ul>
-        </article>
+      <div class="skills" data-stagger id="skillMap">
+        <!-- build:skills -->
+<article class="skill-card card" data-tilt>
+  <div class="skill-card__head">
+    <img src="assets/icons/ec2.svg" alt="" width="40" height="40" />
+    <h3>Cloud &amp; Compute</h3>
+  </div>
+  <ul class="chips">
+    <li><button type="button" class="chip" aria-pressed="false" data-uses="aws-bluegreen-cicd secure-vpc-architecture">EC2</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="">Lambda</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="aws-bluegreen-cicd ses-email-analytics-pipeline secure-vpc-architecture">S3</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="">CloudFront</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="aws-bluegreen-cicd secure-vpc-architecture">ALB</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="secure-vpc-architecture">EFS</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="aws-bluegreen-cicd">Auto Scaling</button></li>
+  </ul>
+</article>
+<article class="skill-card card" data-tilt>
+  <div class="skill-card__head">
+    <img src="assets/icons/vpc.svg" alt="" width="40" height="40" />
+    <h3>Networking &amp; Security</h3>
+  </div>
+  <ul class="chips">
+    <li><button type="button" class="chip" aria-pressed="false" data-uses="secure-vpc-architecture">VPC</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="secure-vpc-architecture">VPC Peering</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="">Route 53</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="aws-bluegreen-cicd ses-email-analytics-pipeline secure-vpc-architecture">IAM</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="">WAF</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="">ACM / SSL</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="secure-vpc-architecture">VPN &amp; MFA</button></li>
+  </ul>
+</article>
+<article class="skill-card card" data-tilt>
+  <div class="skill-card__head">
+    <img src="assets/icons/rds.svg" alt="" width="40" height="40" />
+    <h3>Data &amp; Migration</h3>
+  </div>
+  <ul class="chips">
+    <li><button type="button" class="chip" aria-pressed="false" data-uses="secure-vpc-architecture">RDS</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="zero-downtime-db-migration">DocumentDB</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="zero-downtime-db-migration">AWS DMS</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="ses-email-analytics-pipeline">Athena</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="">Backups &amp; Snapshots</button></li>
+  </ul>
+</article>
+<article class="skill-card card" data-tilt>
+  <div class="skill-card__head">
+    <img src="assets/icons/cloudwatch.svg" alt="" width="40" height="40" />
+    <h3>Automation &amp; Ops</h3>
+  </div>
+  <ul class="chips">
+    <li><button type="button" class="chip" aria-pressed="false" data-uses="aws-bluegreen-cicd">GitLab CI/CD</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="aws-bluegreen-cicd">CodeDeploy</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="secure-vpc-architecture">Terraform</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="secure-vpc-architecture">CloudWatch</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="secure-vpc-architecture">SSM</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="aws-bluegreen-cicd">Bash / Python</button></li><li><button type="button" class="chip" aria-pressed="false" data-uses="secure-vpc-architecture">Linux</button></li>
+  </ul>
+</article>
+<!-- /build:skills -->
       </div>
+      <p class="skills__hint" id="skillHint" aria-live="polite">Tap a skill to see which projects use it.</p>
+      <!-- build:certs -->
+
+<!-- /build:certs -->
     </section>
 
     <!-- About -->
@@ -475,7 +468,8 @@
     <p>Designed &amp; built by Vipul S Jain</p>
   </footer>
 
-  <script src="vendor/motion.js"></script>
+  <script src="vendor/gsap/gsap.min.js"></script>
+  <script src="vendor/gsap/ScrollTrigger.min.js"></script>
   <script src="intro.js"></script>
   <script src="script.js"></script>
 </body>

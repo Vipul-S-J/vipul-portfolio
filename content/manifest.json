@@ -1,0 +1,271 @@
+{
+  "source": "f030d10",
+  "note": "Snapshot of the published content before the upgrade. Do not edit by hand.",
+  "content": {
+    "hero": {
+      "eyebrow": "Cloud Engineer · Bengaluru, India",
+      "title": "Hi, I'm Vipul S Jain .",
+      "typedFallback": "build and secure the cloud.",
+      "lead": "3+ years designing, securing, and automating AWS environments, from VPC networking and IAM to zero-downtime deployments and database migration.",
+      "ctas": [
+        {
+          "href": "#projects",
+          "label": "View my work"
+        },
+        {
+          "href": "#contact",
+          "label": "Get in touch"
+        }
+      ]
+    },
+    "stats": [
+      {
+        "value": "3+",
+        "label": "years on AWS"
+      },
+      {
+        "value": "~40%",
+        "label": "faster incident response"
+      },
+      {
+        "value": "20+",
+        "label": "resources monitored"
+      },
+      {
+        "value": "18",
+        "label": "instance Spot + On-Demand fleet"
+      }
+    ],
+    "projects": [
+      {
+        "title": "AWS Blue/Green CI/CD Automation",
+        "kind": "Featured",
+        "desc": "Zero-downtime blue/green deployments with AWS CodeDeploy, fed by a GitLab CI → S3 artifact pipeline, on a mixed-instances Auto Scaling Group that blends Graviton and x86 across On-Demand and Spot.",
+        "flow": [
+          "GitLab CI",
+          "S3",
+          "CodeDeploy",
+          "ALB"
+        ],
+        "tags": [
+          "CodeDeploy",
+          "GitLab CI/CD",
+          "Auto Scaling",
+          "Spot"
+        ],
+        "links": [
+          "https://github.com/Vipul-S-J/aws-bluegreen-cicd"
+        ]
+      },
+      {
+        "title": "SES Email Analytics Pipeline",
+        "kind": "Featured",
+        "desc": "A serverless pipeline that captures Amazon SES events (sends, deliveries, opens, clicks, bounces) in near real time and makes them queryable with SQL. Provisioned with Terraform.",
+        "flow": [
+          "SES",
+          "Firehose",
+          "S3",
+          "Athena"
+        ],
+        "tags": [
+          "SES",
+          "Kinesis Firehose",
+          "Athena",
+          "Terraform"
+        ],
+        "links": [
+          "https://github.com/Vipul-S-J/ses-email-analytics-pipeline"
+        ]
+      },
+      {
+        "title": "Secure VPC Architecture",
+        "kind": "Featured",
+        "desc": "A production AWS environment in Terraform: a 6-subnet VPC with NAT, an ALB in front of EC2, RDS MySQL and EFS, all encrypted with KMS. Audited with CloudTrail, GuardDuty and AWS Config, with OpenVPN access and VPC peering.",
+        "flow": [
+          "ALB",
+          "EC2",
+          "RDS",
+          "EFS"
+        ],
+        "tags": [
+          "Terraform",
+          "VPC",
+          "KMS",
+          "GuardDuty"
+        ],
+        "links": [
+          "https://github.com/Vipul-S-J/Secure-VPC-Architecture"
+        ]
+      },
+      {
+        "title": "Zero-Downtime DB Migration",
+        "kind": "Work",
+        "desc": "Migrated a production MongoDB workload to Amazon DocumentDB using AWS DMS, with full data validation and minimal downtime.",
+        "flow": [
+          "MongoDB",
+          "AWS DMS",
+          "DocumentDB"
+        ],
+        "tags": [
+          "AWS DMS",
+          "DocumentDB",
+          "MongoDB"
+        ],
+        "links": []
+      },
+      {
+        "title": "More AWS projects",
+        "kind": "Repository",
+        "desc": "Hands-on infrastructure, automation, and security builds collected in one repository.",
+        "flow": [],
+        "tags": [
+          "AWS",
+          "IaC",
+          "Automation",
+          "Security"
+        ],
+        "links": [
+          "https://github.com/Vipul-S-J/AWS_Projects"
+        ]
+      }
+    ],
+    "experience": [
+      {
+        "role": "Software / Server Engineer @ KaHa Technologies",
+        "date": "Current April 2023 — Present",
+        "bullets": [
+          "Architected secure, scalable AWS environments using EC2, S3, RDS, and Lambda.",
+          "Designed VPC architectures with public/private subnets, NAT gateways, and VPN connections.",
+          "Enforced security with IAM least-privilege roles, MFA, and WAF rules.",
+          "Reduced incident response time ~40% with CloudWatch dashboards and proactive alerting across 20+ resources.",
+          "Managed RDS and DocumentDB with automated backups and point-in-time recovery."
+        ],
+        "tags": [
+          "EC2",
+          "VPC",
+          "IAM",
+          "WAF",
+          "CloudWatch",
+          "RDS"
+        ]
+      },
+      {
+        "role": "AWS DevOps Intern @ KredX",
+        "date": "Internship · Bengaluru",
+        "bullets": [
+          "Migrated MongoDB to Amazon DocumentDB using AWS DMS with minimal-downtime replication and full data validation.",
+          "Built CI/CD pipelines with GitLab CI/CD and AWS CodeDeploy for consistent, version-controlled releases on EC2."
+        ],
+        "tags": [
+          "AWS DMS",
+          "DocumentDB",
+          "GitLab CI/CD",
+          "CodeDeploy"
+        ]
+      }
+    ],
+    "skills": [
+      {
+        "group": "Cloud & Compute",
+        "items": [
+          "EC2",
+          "Lambda",
+          "S3",
+          "CloudFront",
+          "ALB",
+          "EFS",
+          "Auto Scaling"
+        ]
+      },
+      {
+        "group": "Networking & Security",
+        "items": [
+          "VPC",
+          "VPC Peering",
+          "Route 53",
+          "IAM",
+          "WAF",
+          "ACM / SSL",
+          "VPN & MFA"
+        ]
+      },
+      {
+        "group": "Data & Migration",
+        "items": [
+          "RDS",
+          "DocumentDB",
+          "AWS DMS",
+          "Athena",
+          "Backups & Snapshots"
+        ]
+      },
+      {
+        "group": "Automation & Ops",
+        "items": [
+          "GitLab CI/CD",
+          "CodeDeploy",
+          "Terraform",
+          "CloudWatch",
+          "SSM",
+          "Bash / Python",
+          "Linux"
+        ]
+      }
+    ],
+    "about": {
+      "paragraphs": [
+        "I build reliable, secure, and automated infrastructure on Amazon Web Services . My day-to-day spans VPC architecture, IAM least-privilege security, database migration with AWS DMS, and CI/CD automation.",
+        "At KaHa Technologies I architect cloud environments, cut incident response time with proactive monitoring, and keep releases consistent and low-downtime. I care about reliability, automation, and getting the security work right the first time."
+      ],
+      "tech": [
+        "AWS (EC2, S3, VPC)",
+        "Lambda & CloudFront",
+        "RDS & DocumentDB",
+        "IAM & WAF",
+        "GitLab CI/CD",
+        "Linux & Bash"
+      ],
+      "facts": [
+        [
+          "Role",
+          "Cloud Engineer"
+        ],
+        [
+          "Experience",
+          "3+ years"
+        ],
+        [
+          "Focus",
+          "AWS architecture & security"
+        ],
+        [
+          "Location",
+          "Bengaluru, India"
+        ]
+      ]
+    },
+    "contact": {
+      "title": "Let's build something reliable.",
+      "text": "I'm open to conversations about cloud infrastructure, automation, and new opportunities. Send me a note and I'll get back to you.",
+      "links": [
+        {
+          "href": "mailto:vipulsjain05@gmail.com",
+          "label": "vipulsjain05@gmail.com"
+        },
+        {
+          "href": "tel:+919148858402",
+          "label": "+91 91488 58402"
+        },
+        {
+          "href": "https://www.linkedin.com/in/vipul-s-patil-ban",
+          "label": "LinkedIn"
+        },
+        {
+          "href": "https://github.com/Vipul-S-J",
+          "label": "GitHub"
+        }
+      ],
+      "email": "vipulsjain05@gmail.com"
+    }
+  }
+}
