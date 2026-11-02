@@ -54,7 +54,7 @@ export function extract(indexHtml) {
     title: text(one(/class="pcard__title"[^>]*>([\s\S]*?)<\/h3>/, c)),
     kind: text(one(/class="pcard__kind"[^>]*>([\s\S]*?)<\/p>/, c)),
     desc: text(one(/class="pcard__desc"[^>]*>([\s\S]*?)<\/p>/, c)),
-    flow: all(/<li><span>([\s\S]*?)<\/span><\/li>/g, one(/<ol class="flow"[^>]*>([\s\S]*?)<\/ol>/, c)).map(m => text(m[1])),
+    flow: all(/<li[^>]*><span>([\s\S]*?)<\/span><\/li>/g, one(/<ol class="flow"[^>]*>([\s\S]*?)<\/ol>/, c)).map(m => text(m[1])),
     tags: all(/<li>([^<]*)<\/li>/g, one(/<ul class="tags">([\s\S]*?)<\/ul>/, c)).map(m => text(m[1])),
     links: all(/href="(https?:\/\/[^"]+)"/g, c).map(m => m[1]),
   }));
