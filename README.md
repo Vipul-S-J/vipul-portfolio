@@ -48,3 +48,8 @@ Search for `TODO` and the placeholder links in `index.html`:
 - **GitHub Pages:** push this folder to a repo, enable Pages on the `main` branch.
 - **Netlify / Vercel:** drag-and-drop the folder, or connect the repo. No build command needed.
 ```
+
+## Build & checks
+- `node scripts/build.mjs` regenerates project cards, skills map and `projects/<slug>/` pages from `content/*.json`.
+- `node scripts/check-parity.mjs` verifies no content was lost.
+- `node scripts/check-budget.mjs` checks asset size budgets.
