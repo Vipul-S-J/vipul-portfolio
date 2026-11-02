@@ -69,17 +69,25 @@
   var toggle = $('#navToggle');
   var links = $('#navLinks');
   var indicator = $('#navIndicator');
-  var navAnchors = links ? $$('a[href^="#"]', links) : [];
+  var navAnchors = links ? $$('a[href]', links) : [];
   var activeLink = null;
   var autoScrollUntil = 0;
 
-  function setMenu(open) {
+  var menuBackdrop = ['main', 'footer'].map(function (s) { return $(s); }).filter(Boolean);
+  function setMenu(open, returnFocus) {
     if (!links || !toggle) return;
+    var was = links.classList.contains('open');
     links.classList.toggle('open', open);
     toggle.classList.toggle('open', open);
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    // While the sheet is open the page behind it is out of reach (a focus trap that keeps the header controls)
+    menuBackdrop.forEach(function (el) { if (open) el.setAttribute('inert', ''); else if (!root.classList.contains('intro-active')) el.removeAttribute('inert'); });
+    if (was && !open && returnFocus) toggle.focus();
   }
+  document.addEventListener('pointerdown', function (e) {
+    if (links && links.classList.contains('open') && !e.target.closest('.nav')) setMenu(false);
+  });
 
   if (toggle) {
     toggle.addEventListener('click', function () {
@@ -87,7 +95,7 @@
     });
   }
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') setMenu(false);
+    if (e.key === 'Escape') setMenu(false, true);
   });
 
   function scrollToId(id) {
@@ -241,6 +249,41 @@
   // ----------------------------------------------------------
   // Copy email
   // ----------------------------------------------------------
+  function initSkillMap() {
+    var chips = $$('.chip');
+    var cards = $$('.pcard');
+    var hint = $('#skillHint');
+    if (!chips.length || !hint) return;
+    var base = hint.textContent;
+    var pinned = null;
+    function titleOf(slug) {
+      var c = cards.filter(function (x) { return x.dataset.slug === slug; })[0];
+      return c ? text($('.pcard__title', c)) : slug;
+    }
+    function show(chip) {
+      var uses = chip ? (chip.dataset.uses || '').split(' ').filter(Boolean) : [];
+      cards.forEach(function (c) { c.classList.toggle('is-related', uses.indexOf(c.dataset.slug) !== -1); });
+      root.classList.toggle('skill-active', !!chip);
+      chips.forEach(function (c) { c.classList.toggle('is-on', c === chip); });
+      if (!chip) { hint.textContent = base; return; }
+      hint.textContent = uses.length
+        ? chip.textContent + ': used in ' + uses.length + (uses.length === 1 ? ' project' : ' projects') + ' (' + uses.map(titleOf).join(', ') + ')'
+        : chip.textContent + ': listed as a skill; no project card uses it yet.';
+    }
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        pinned = pinned === chip ? null : chip;
+        chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c === pinned)); });
+        show(pinned);
+      });
+      if (finePointer) {
+        chip.addEventListener('pointerenter', function () { show(chip); });
+        chip.addEventListener('pointerleave', function () { show(pinned); });
+      }
+      chip.addEventListener('focus', function () { show(chip); });
+      chip.addEventListener('blur', function () { show(pinned); });
+    });
+  }
   function initCopy() {
     var btn = $('#copyEmail');
     var label = $('#copyLabel');
@@ -322,15 +365,19 @@
       function add(group, label, hintText, run, keys) {
         items.push({ group: group, label: label, hint: hintText || '', run: run, keys: (keys || '').toLowerCase() });
       }
-      add('Go to', 'Home', '', function () { scrollToId('home'); }, 'top hero');
+      add('Go to', 'Home', '', function () {
+        if ($('#home')) scrollToId('home'); else window.location.href = (document.querySelector('.nav__logo') || {}).href || './';
+      }, 'top hero');
       navAnchors.forEach(function (a) {
-        var id = a.getAttribute('href').slice(1);
-        add('Go to', text(a), '#' + id, function () { scrollToId(id); });
+        var href = a.getAttribute('href');
+        if (href.charAt(0) === '#') add('Go to', text(a), href, function () { scrollToId(href.slice(1)); });
+        else add('Go to', text(a), '', function () { window.location.href = a.href; });
       });
       $$('.pcard').forEach(function (card) {
         var title = text($('.pcard__title', card));
-        var repo = $('a.gh-btn', card);
-        if (title && repo) add('Projects', title, 'GitHub \u2197', function () { go(repo.href); }, 'project repo source code');
+        var study = $('a.pcard__link', card), repo = $('a.gh-btn', card);
+        if (title && study) add('Projects', title, 'Case study', function () { window.location.href = study.href; }, 'project architecture case study');
+        else if (title && repo) add('Projects', title, 'GitHub \u2197', function () { go(repo.href); }, 'project repo source code');
       });
       var mail = $('.contact__actions a[href^="mailto:"]');
       var copyBtn = $('#copyEmail');
@@ -436,6 +483,7 @@
     startTyping();
     initCopy();
     initPalette();
+    initSkillMap();
     return;
   }
   clearTimeout(window.__revealFallback);
@@ -612,6 +660,7 @@
   startTyping();
   initCopy();
   initPalette();
+  initSkillMap();
 
   // ----------------------------------------------------------
   // Hero orb: a rotating particle sphere (paused off-screen,
@@ -631,14 +680,14 @@
   // Size the orb to the free space between the nav bar and the stats row,
   // so the sphere never runs under either of them.
   function fitOrb() {
-    var orb = $('#orb'), hero = $('#home'), stats = $('#stats');
-    if (!orb || !hero || !stats) return;
+    var orb = $('#orb'), hero = $('#home');
+    if (!orb || !hero) return;
     var vw = document.documentElement.clientWidth;
     var MARGIN = 36;
     var SPHERE = 0.95; // visible height of the outer shell as a share of the canvas size
     var heroTop = hero.getBoundingClientRect().top;
     var regionTop = ((nav && nav.offsetHeight) || 72) + MARGIN;
-    var regionBot = stats.getBoundingClientRect().top - heroTop - MARGIN;
+    var regionBot = hero.getBoundingClientRect().height - 96 - MARGIN; // clear of the pause control and scroll cue
     var cap = vw <= 768 ? vw * 1.05 : vw <= 1024 ? Math.min(vw * 0.8, 560) : Math.min(vw * 0.46, 620);
     var size;
     var top;

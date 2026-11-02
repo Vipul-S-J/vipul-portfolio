@@ -49,7 +49,7 @@ export function extract(indexHtml) {
     label: text(one(/<span>([\s\S]*?)<\/span>/, m[1])),
   }));
 
-  const cards = projects.split('<li class="pcard"').slice(1);
+  const cards = projects.split(/<li class="pcard(?:\s[^"]*)?"/).slice(1);
   out.projects = cards.map(c => ({
     title: text(one(/class="pcard__title"[^>]*>([\s\S]*?)<\/h3>/, c)),
     kind: text(one(/class="pcard__kind"[^>]*>([\s\S]*?)<\/p>/, c)),

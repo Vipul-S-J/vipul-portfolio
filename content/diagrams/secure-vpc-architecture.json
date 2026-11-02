@@ -1,0 +1,399 @@
+{
+ "title": "Production network and security layers",
+ "alt": "Architecture diagram: internet traffic reaches an ALB in public subnets, then an app server in a private subnet, which uses RDS MySQL and EFS. A NAT gateway provides outbound access. KMS encrypts the data stores, and CloudTrail, GuardDuty and AWS Config monitor the account.",
+ "nodes": [
+  {
+   "id": "internet",
+   "label": "Internet",
+   "sub": "visitors",
+   "icon": "globe",
+   "kind": "neutral",
+   "d": [
+    0,
+    1
+   ],
+   "m": [
+    0,
+    0
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "alb",
+   "label": "Load balancer",
+   "sub": "internet-facing ALB",
+   "icon": "balance",
+   "kind": "network",
+   "d": [
+    1,
+    1
+   ],
+   "m": [
+    0,
+    1
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "nat",
+   "label": "NAT gateway",
+   "sub": "outbound access",
+   "icon": "nat",
+   "kind": "network",
+   "d": [
+    1,
+    2
+   ],
+   "m": [
+    1,
+    1
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "ec2",
+   "label": "App server",
+   "sub": "EC2 \u00b7 SSM access",
+   "icon": "ec2",
+   "kind": "compute",
+   "d": [
+    2,
+    1
+   ],
+   "m": [
+    0,
+    2
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "rds",
+   "label": "RDS MySQL",
+   "sub": "database",
+   "icon": "rds",
+   "kind": "database",
+   "d": [
+    3,
+    1
+   ],
+   "m": [
+    0,
+    3
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "efs",
+   "label": "EFS",
+   "sub": "shared files",
+   "icon": "files",
+   "kind": "storage",
+   "d": [
+    3,
+    2
+   ],
+   "m": [
+    1,
+    3
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "kms",
+   "label": "KMS",
+   "sub": "encryption key",
+   "icon": "key",
+   "kind": "security",
+   "d": [
+    4,
+    1
+   ],
+   "m": [
+    0,
+    4
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "alarms",
+   "label": "Alarms",
+   "sub": "CloudWatch + SNS",
+   "icon": "cloudwatch",
+   "kind": "security",
+   "d": [
+    4,
+    3
+   ],
+   "m": [
+    0,
+    5
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "cloudtrail",
+   "label": "CloudTrail",
+   "sub": "multi-region",
+   "icon": "trail",
+   "kind": "security",
+   "d": [
+    5,
+    0
+   ],
+   "m": [
+    0,
+    6
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "guardduty",
+   "label": "GuardDuty",
+   "sub": "threat detection",
+   "icon": "shield",
+   "kind": "security",
+   "d": [
+    5,
+    1
+   ],
+   "m": [
+    1,
+    6
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  },
+  {
+   "id": "config",
+   "label": "AWS Config",
+   "sub": "configuration audit",
+   "icon": "trail",
+   "kind": "security",
+   "d": [
+    5,
+    2
+   ],
+   "m": [
+    0,
+    7
+   ],
+   "source": "Secure-VPC-Architecture README + docs/architecture.md"
+  }
+ ],
+ "groups": [
+  {
+   "id": "vpc",
+   "label": "VPC \u00b7 eu-north-1",
+   "kind": "network",
+   "members": [
+    "alb",
+    "nat",
+    "ec2",
+    "rds",
+    "efs"
+   ],
+   "pad": 30
+  },
+  {
+   "id": "pub",
+   "label": "Public subnets",
+   "kind": "network",
+   "members": [
+    "alb",
+    "nat"
+   ],
+   "pad": 12
+  },
+  {
+   "id": "app",
+   "label": "Private \u00b7 app",
+   "kind": "compute",
+   "members": [
+    "ec2"
+   ],
+   "pad": 12
+  },
+  {
+   "id": "db",
+   "label": "Private \u00b7 DB",
+   "kind": "database",
+   "members": [
+    "rds"
+   ],
+   "pad": 12
+  },
+  {
+   "id": "audit",
+   "label": "Audit & detection",
+   "kind": "security",
+   "members": [
+    "cloudtrail",
+    "guardduty",
+    "config"
+   ],
+   "pad": 14
+  }
+ ],
+ "edges": [
+  {
+   "id": "e1",
+   "from": "internet",
+   "to": "alb"
+  },
+  {
+   "id": "e2",
+   "from": "alb",
+   "to": "ec2"
+  },
+  {
+   "id": "e3",
+   "from": "ec2",
+   "to": "rds"
+  },
+  {
+   "id": "e4",
+   "from": "ec2",
+   "to": "efs"
+  },
+  {
+   "id": "e5",
+   "from": "ec2",
+   "to": "nat",
+   "sides": {
+    "d": [
+     "b",
+     "r"
+    ],
+    "m": [
+     "r",
+     "b"
+    ]
+   }
+  },
+  {
+   "id": "e6",
+   "from": "nat",
+   "to": "internet",
+   "sides": {
+    "d": [
+     "l",
+     "b"
+    ],
+    "m": [
+     "t",
+     "r"
+    ]
+   }
+  },
+  {
+   "id": "e7",
+   "from": "kms",
+   "to": "rds"
+  },
+  {
+   "id": "e8",
+   "from": "kms",
+   "to": "efs",
+   "sides": {
+    "d": [
+     "b",
+     "r"
+    ],
+    "m": [
+     "r",
+     "b"
+    ]
+   }
+  }
+ ],
+ "steps": [
+  {
+   "n": 1,
+   "text": "Visitors reach the internet-facing Application Load Balancer in the public subnets.",
+   "nodes": [
+    "internet",
+    "alb"
+   ],
+   "edges": [
+    "e1"
+   ],
+   "retire": []
+  },
+  {
+   "n": 2,
+   "text": "The ALB forwards web traffic to the app server in a private subnet.",
+   "nodes": [
+    "ec2"
+   ],
+   "edges": [
+    "e2"
+   ],
+   "retire": []
+  },
+  {
+   "n": 3,
+   "text": "The app server uses RDS MySQL. The database layer accepts traffic only from the app layer.",
+   "nodes": [
+    "rds"
+   ],
+   "edges": [
+    "e3"
+   ],
+   "retire": []
+  },
+  {
+   "n": 4,
+   "text": "Shared files live on EFS.",
+   "nodes": [
+    "efs"
+   ],
+   "edges": [
+    "e4"
+   ],
+   "retire": []
+  },
+  {
+   "n": 5,
+   "text": "Private subnets reach the internet outbound through the NAT gateway.",
+   "nodes": [
+    "nat"
+   ],
+   "edges": [
+    "e5",
+    "e6"
+   ],
+   "retire": []
+  },
+  {
+   "n": 6,
+   "text": "A KMS key encrypts the data stores.",
+   "nodes": [
+    "kms"
+   ],
+   "edges": [
+    "e7",
+    "e8"
+   ],
+   "retire": []
+  },
+  {
+   "n": 7,
+   "text": "CloudTrail, GuardDuty and AWS Config watch the account.",
+   "nodes": [
+    "cloudtrail",
+    "guardduty",
+    "config"
+   ],
+   "edges": [],
+   "retire": []
+  },
+  {
+   "n": 8,
+   "text": "CloudWatch alarms notify the alert email addresses through SNS.",
+   "nodes": [
+    "alarms"
+   ],
+   "edges": [],
+   "retire": []
+  }
+ ]
+}

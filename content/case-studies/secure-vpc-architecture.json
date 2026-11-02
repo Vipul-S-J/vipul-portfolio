@@ -1,0 +1,67 @@
+{
+ "lead": "A production AWS environment in eu-north-1 (Stockholm) defined as Terraform code: a VPC with six subnets, an internet-facing load balancer in front of private application servers, RDS MySQL and EFS, with KMS encryption, CloudTrail, GuardDuty and AWS Config, OpenVPN access and VPC peering.",
+ "sections": [
+  {
+   "id": "settings",
+   "title": "Key settings",
+   "table": [
+    [
+     "Region",
+     "eu-north-1 (Stockholm)"
+    ],
+    [
+     "Subnets",
+     "6: two public, two private (app), two private (DB), across eu-north-1a and 1b"
+    ],
+    [
+     "Outbound access",
+     "NAT gateway in a public subnet, attached to the private route table"
+    ],
+    [
+     "Load balancer",
+     "Internet-facing Application Load Balancer across the public subnets"
+    ],
+    [
+     "Auditing",
+     "Multi-region CloudTrail to S3 and a CloudWatch log group; GuardDuty; AWS Config"
+    ],
+    [
+     "Encryption",
+     "Symmetric KMS key"
+    ],
+    [
+     "Access to servers",
+     "AWS Systems Manager Session Manager, no SSH key"
+    ],
+    [
+     "Alerts",
+     "CloudWatch alarms and SNS to the alert email addresses"
+    ],
+    [
+     "Tooling",
+     "Terraform 1.10 or newer; OpenVPN server and VPC peering are optional"
+    ]
+   ]
+  },
+  {
+   "id": "decisions",
+   "title": "Design decisions",
+   "bullets": [
+    "All servers and databases sit in private subnets and are exposed to the internet only through the load balancer.",
+    "Security groups allow only web and app traffic from outside; the database layer accepts traffic only from the app layer.",
+    "No SSH keys: the app server is reached through SSM Session Manager.",
+    "CloudTrail logs all activity in the account, across regions."
+   ]
+  },
+  {
+   "id": "repo",
+   "title": "What is in the repository",
+   "bullets": [
+    "vpc.tf, security_groups.tf, alb.tf, ec2.tf, rds.tf, efs.tf: network, access control and the application stack",
+    "kms.tf, cloudtrail.tf, guardduty.tf, config.tf, monitoring.tf: encryption, auditing and alerting",
+    "openvpn.tf and vpc_peering.tf: optional VPN server and peering with partner VPCs",
+    "docs/: architecture diagram (png and editable draw.io) and description"
+   ]
+  }
+ ]
+}

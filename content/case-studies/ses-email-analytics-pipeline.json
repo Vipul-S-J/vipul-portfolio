@@ -1,0 +1,66 @@
+{
+ "lead": "A serverless pipeline that captures Amazon SES email events in near real time, streams them through Amazon Kinesis Data Firehose into S3, and makes them queryable with Athena, so email engagement and deliverability can be analysed with SQL and no servers to manage.",
+ "sections": [
+  {
+   "id": "events",
+   "title": "Events captured",
+   "table": [
+    [
+     "Sending and delivery",
+     "Send, Delivery, Reject, Rendering failure"
+    ],
+    [
+     "Deliverability",
+     "Hard bounce, Complaint, Delivery delay"
+    ],
+    [
+     "Engagement",
+     "Open, Click"
+    ],
+    [
+     "Subscription",
+     "Subscription"
+    ]
+   ]
+  },
+  {
+   "id": "settings",
+   "title": "Key settings",
+   "table": [
+    [
+     "Delivery to S3",
+     "Every 5 minutes or 5 MiB, whichever comes first"
+    ],
+    [
+     "Data format",
+     "Newline-delimited JSON, partitioned by date"
+    ],
+    [
+     "Infrastructure as code",
+     "CloudFormation template (creates named IAM roles)"
+    ],
+    [
+     "Querying",
+     "Athena external table plus sample queries"
+    ]
+   ]
+  },
+  {
+   "id": "decisions",
+   "title": "Design decisions",
+   "bullets": [
+    "Serverless from end to end: SES, Firehose, S3 and Athena leave no servers to patch or scale.",
+    "CloudFormation is the recommended way to deploy; a console walkthrough covers the same steps."
+   ]
+  },
+  {
+   "id": "repo",
+   "title": "What is in the repository",
+   "bullets": [
+    "cloudformation/ses-analytics-pipeline.yaml: the stack",
+    "athena/create_table.sql and athena/sample_queries.sql: the external table and example analytics queries",
+    "docs/setup-guide.md: step-by-step console walkthrough"
+   ]
+  }
+ ]
+}

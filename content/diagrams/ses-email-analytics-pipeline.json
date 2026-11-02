@@ -1,0 +1,156 @@
+{
+ "title": "Event pipeline",
+ "alt": "Architecture diagram: an Amazon SES configuration set publishes email events to Kinesis Data Firehose, which writes date-partitioned JSON to S3 where Athena queries it with SQL.",
+ "nodes": [
+  {
+   "id": "config",
+   "label": "Configuration set",
+   "sub": "on a verified identity",
+   "icon": "settings",
+   "kind": "neutral",
+   "d": [
+    0,
+    0
+   ],
+   "m": [
+    0,
+    0
+   ],
+   "source": "ses-email-analytics-pipeline README: Architecture"
+  },
+  {
+   "id": "ses",
+   "label": "Amazon SES",
+   "sub": "publishes events",
+   "icon": "ses",
+   "kind": "analytics",
+   "d": [
+    1,
+    0
+   ],
+   "m": [
+    1,
+    0
+   ],
+   "source": "ses-email-analytics-pipeline README: Architecture"
+  },
+  {
+   "id": "firehose",
+   "label": "Data Firehose",
+   "sub": "buffers records",
+   "icon": "stream",
+   "kind": "analytics",
+   "d": [
+    2,
+    0
+   ],
+   "m": [
+    0,
+    1
+   ],
+   "source": "ses-email-analytics-pipeline README: Architecture"
+  },
+  {
+   "id": "s3",
+   "label": "Amazon S3",
+   "sub": "JSON, partitioned by date",
+   "icon": "bucket",
+   "kind": "storage",
+   "d": [
+    3,
+    0
+   ],
+   "m": [
+    1,
+    1
+   ],
+   "source": "ses-email-analytics-pipeline README: Architecture"
+  },
+  {
+   "id": "athena",
+   "label": "Amazon Athena",
+   "sub": "SQL on S3",
+   "icon": "search",
+   "kind": "analytics",
+   "d": [
+    4,
+    0
+   ],
+   "m": [
+    0,
+    2
+   ],
+   "source": "ses-email-analytics-pipeline README: Architecture"
+  }
+ ],
+ "groups": [],
+ "edges": [
+  {
+   "id": "e1",
+   "from": "config",
+   "to": "ses"
+  },
+  {
+   "id": "e2",
+   "from": "ses",
+   "to": "firehose"
+  },
+  {
+   "id": "e3",
+   "from": "firehose",
+   "to": "s3"
+  },
+  {
+   "id": "e4",
+   "from": "s3",
+   "to": "athena"
+  }
+ ],
+ "steps": [
+  {
+   "n": 1,
+   "text": "A configuration set is assigned to a verified SES identity (domain or email).",
+   "nodes": [
+    "config",
+    "ses"
+   ],
+   "edges": [
+    "e1"
+   ],
+   "retire": []
+  },
+  {
+   "n": 2,
+   "text": "SES publishes the selected event types to a Firehose delivery stream.",
+   "nodes": [
+    "firehose"
+   ],
+   "edges": [
+    "e2"
+   ],
+   "retire": []
+  },
+  {
+   "n": 3,
+   "text": "Firehose buffers records and writes newline-delimited JSON to S3, partitioned by date.",
+   "nodes": [
+    "s3"
+   ],
+   "edges": [
+    "e3"
+   ],
+   "retire": []
+  },
+  {
+   "n": 4,
+   "text": "Athena reads the data through an external table, so it can be queried with standard SQL.",
+   "nodes": [
+    "athena"
+   ],
+   "edges": [
+    "e4"
+   ],
+   "retire": []
+  }
+ ]
+}
